@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>View File - {{ file_path }}</title>
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    <body>
+        <div class="container">
+            <h1>File: {{ file_path }}</h1>
+            <a href="{{ url_for('index') }}">Back to Repository Structure</a>
+            <pre class="json-content">{{ content | tojson(indent=2) }}</pre>
+        </div>
+    </body>
+</html>

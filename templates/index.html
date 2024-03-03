@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Security Compliance Docs Collector</title>
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    <body>
+        <div class="container">
+            <h1>Security Compliance Docs Collector</h1>
+            <p>This tool collects and displays security compliance documents
+                from various sources.</p>
+
+            <h2>Repository Structure</h2>
+            <ul class="file-tree">
+                {% for folder, content in structure.items() recursive %}
+                <li>
+                    {% if content is mapping %}
+                    <span class="folder">{{ folder }}</span>
+                    <ul>
+                        {{ loop(content.items()) }}
+                    </ul>
+                    {% else %}
+                    <a href="{{ url_for('view_file', file_path=content) }}">{{
+                        folder }}</a>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </body>
+</html>
