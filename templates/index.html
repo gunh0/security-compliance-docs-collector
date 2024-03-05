@@ -10,10 +10,10 @@
     <body>
         <div class="container">
             <h1>Security Compliance Docs Collector</h1>
-            <p>This tool collects and displays security compliance documents
-                from various sources.</p>
+            <p>This tool displays security compliance documents from various
+                cloud providers.</p>
 
-            <h2>Repository Structure</h2>
+            <h2>Documents List</h2>
             <ul class="file-tree">
                 {% for folder, content in structure.items() recursive %}
                 <li>
@@ -23,7 +23,8 @@
                         {{ loop(content.items()) }}
                     </ul>
                     {% else %}
-                    <a href="{{ url_for('view_file', file_path=content) }}">{{
+                    <a
+                        href="{{ url_for('view_file', file_path=content[5:]) }}">{{
                         folder }}</a>
                     {% endif %}
                 </li>

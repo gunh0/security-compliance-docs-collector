@@ -5,13 +5,9 @@ import json
 app = Flask(__name__)
 
 
-def get_repo_structure():
+def get_docs_structure(root_dir="docs"):
     structure = {}
-    for root, dirs, files in os.walk("."):
-        if ".git" in dirs:
-            dirs.remove(".git")
-        if "venv" in dirs:
-            dirs.remove("venv")
+    for root, dirs, files in os.walk(root_dir):
         path = root.split(os.sep)
         current = structure
         for d in path[1:]:
@@ -31,13 +27,13 @@ def read_json_file(file_path):
 
 @app.route("/")
 def index():
-    repo_structure = get_repo_structure()
-    return render_template("index.html", structure=repo_structure)
+    docs_structure = get_docs_structure()
+    return render_template("index.html", structure=docs_structure)
 
 
 @app.route("/view/<path:file_path>")
 def view_file(file_path):
-    full_path = os.path.join(".", file_path)
+    full_path = os.path.join("docs", file_path)
     if os.path.exists(full_path) and full_path.endswith(".json"):
         content = read_json_file(full_path)
         return render_template("view_file.html", file_path=file_path, content=content)

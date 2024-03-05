@@ -6,12 +6,29 @@
         <title>View File - {{ file_path }}</title>
         <link rel="stylesheet"
             href="{{ url_for('static', filename='style.css') }}">
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.9.2/jsoneditor.min.js"></script>
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.9.2/jsoneditor.min.css">
     </head>
     <body>
         <div class="container">
             <h1>File: {{ file_path }}</h1>
-            <a href="{{ url_for('index') }}">Back to Repository Structure</a>
-            <pre class="json-content">{{ content | tojson(indent=2) }}</pre>
+            <a href="{{ url_for('index') }}">Back to Documents List</a>
+            <div id="json-viewer"></div>
         </div>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('json-viewer');
+            const options = {
+                mode: 'tree',
+                modes: ['tree', 'view', 'form', 'code', 'text'],
+            };
+            const editor = new JSONEditor(container, options);
+            const json = {{ content | tojson | safe }};
+            editor.set(json);
+            editor.expandAll();
+        });
+    </script>
     </body>
 </html>
