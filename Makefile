@@ -1,8 +1,18 @@
+BIN := bin/security-compliance-docs-collector
+
 run:
-	flask --app main run --host=0.0.0.0 --port=5000
+	go run .
 
-dev:
-	FLASK_ENV=development FLASK_DEBUG=1 flask --app main run --host=0.0.0.0 --port=5000 --reload
+build:
+	go build -o $(BIN) .
 
-freeze:
-	pip freeze > requirements.txt
+test:
+	go test ./...
+
+fmt:
+	gofmt -w .
+
+vet:
+	go vet ./...
+
+.PHONY: run build test fmt vet

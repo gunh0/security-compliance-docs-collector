@@ -3,9 +3,8 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>View File - {{ file_path }}</title>
-        <link rel="stylesheet"
-            href="{{ url_for('static', filename='style.css') }}">
+        <title>View File - {{.FilePath}}</title>
+        <link rel="stylesheet" href="/static/style.css">
         <script
             src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.9.2/jsoneditor.min.js"></script>
         <link rel="stylesheet"
@@ -13,8 +12,8 @@
     </head>
     <body>
         <div class="container">
-            <h1>File: {{ file_path }}</h1>
-            <a href="{{ url_for('index') }}">Back to Documents List</a>
+            <h1>File: {{.FilePath}}</h1>
+            <a href="/">Back to Documents List</a>
             <div id="json-viewer"></div>
         </div>
         <script>
@@ -25,7 +24,7 @@
                 modes: ['tree', 'view', 'form', 'code', 'text'],
             };
             const editor = new JSONEditor(container, options);
-            const json = {{ content | tojson | safe }};
+            const json = {{.Content}};
             editor.set(json);
             editor.expandAll();
         });
