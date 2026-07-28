@@ -1,1 +1,0 @@
-FLASK_RUN_EXTRA_FILES=main.py,templates/*,static/*

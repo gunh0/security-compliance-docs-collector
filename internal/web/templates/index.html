@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Security Compliance Docs Collector</title>
+        <link rel="stylesheet" href="/static/style.css">
+    </head>
+    <body>
+        <div class="container">
+            <h1>Security Compliance Docs Collector</h1>
+            <p>This tool displays security compliance documents from various
+                cloud providers.</p>
+
+            <h2>Documents List</h2>
+            {{template "tree" .}}
+        </div>
+    </body>
+</html>
+
+{{define "tree"}}
+<ul class="file-tree">
+    {{range .}}
+    <li>
+        {{if .IsDir}}
+        <span class="folder">{{.Name}}</span>
+        {{template "tree" .Children}}
+        {{else}}
+        <a href="/view/{{.Path}}">{{.Name}}</a>
+        {{end}}
+    </li>
+    {{end}}
+</ul>
+{{end}}
