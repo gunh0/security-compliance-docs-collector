@@ -34,14 +34,37 @@ go run . -addr 127.0.0.1:9000 -docs ./docs
 | `-addr` | `127.0.0.1:8080` | Listen address |
 | `-docs` | `docs` | Directory containing compliance documents (`<provider>/<benchmark>.json`) |
 
+### Collecting Documents
+
+`cmd/collect` checks the upstream catalog for CIS benchmark versions that are not in `docs/` yet, validates them (framework, provider, version, requirements) and stores them. Existing documents are never overwritten.
+
+```sh
+make collect        # latest version per provider
+make collect-all    # every published version
+go run ./cmd/collect -ref <tag-or-commit>   # pin the upstream revision
+```
+
+Set `GITHUB_TOKEN` (or put it in `.env`, see `.env.template`) to raise the GitHub API rate limit.
+
+### Collected Documents
+
+| Provider | CIS Benchmark versions |
+|---|---|
+| AWS | v1.4.0, v3.0.0, v7.0.0 |
+| Azure | v2.0.0, v2.1.0, v6.0.0 |
+| GCP | v2.0.0, v5.0.0 |
+| Kubernetes | v1.8.0, v2.0.1 |
+
 ### Project Structure
 
 ```
 .
 ├── main.go                  # entrypoint: flags, http.Server
+├── cmd/collect/             # collects new benchmark versions into docs/
 ├── docs/                    # compliance documents grouped by provider
 └── internal/
     ├── catalog/             # builds the document tree, reads documents safely
+    ├── collector/           # lists, validates and stores upstream documents
     └── web/                 # HTTP handlers + embedded templates/static assets
 ```
 
@@ -60,6 +83,10 @@ make fmt    # gofmt -w .
 - Easy navigation between document list and individual document views
 - Document access is confined to the docs directory (`os.Root`), so path traversal requests are rejected
 - Single static binary with templates and assets embedded
+
+### Data Source
+
+The compliance documents in `docs/` are collected from the compliance catalog of [Prowler](https://github.com/prowler-cloud/prowler/tree/master/prowler/compliance) (Apache License 2.0), which maps CIS Benchmark requirements to automated checks. CIS Benchmarks are © Center for Internet Security, Inc.
 
 ### License
 
