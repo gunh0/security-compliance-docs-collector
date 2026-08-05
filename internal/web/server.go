@@ -34,6 +34,26 @@ func NewHandler(docs fs.FS) http.Handler {
 	return mux
 }
 
+type indexView struct {
+	Sections     []sectionView
+	Documents    int
+	Requirements int
+}
+
+type sectionView struct {
+	Name  string // folder name, e.g. "aws"
+	Label string // provider name shown to users, e.g. "AWS"
+	Docs  []docView
+}
+
+type docView struct {
+	Path         string
+	Title        string
+	Version      string
+	Requirements int
+	Latest       bool
+}
+
 func index(docs fs.FS) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tree, err := catalog.Build(docs)
@@ -41,8 +61,56 @@ func index(docs fs.FS) http.HandlerFunc {
 			serverError(w, err)
 			return
 		}
-		render(w, indexTmpl, tree)
+		render(w, indexTmpl, newIndexView(tree))
 	}
+}
+
+// newIndexView groups documents by top-level folder, newest version first.
+func newIndexView(tree []*catalog.Node) indexView {
+	var v indexView
+	var loose []*catalog.Node
+	for _, n := range tree {
+		if !n.IsDir() {
+			loose = append(loose, n)
+			continue
+		}
+		v.addSection(n.Name, documents(n.Children))
+	}
+	if len(loose) > 0 {
+		v.addSection("other", loose)
+	}
+	return v
+}
+
+func (v *indexView) addSection(name string, nodes []*catalog.Node) {
+	s := sectionView{Name: name, Label: name}
+	for i := len(nodes) - 1; i >= 0; i-- {
+		n := nodes[i]
+		d := docView{Path: n.Path, Title: n.Name, Latest: len(s.Docs) == 0}
+		if m := n.Meta; m != nil {
+			d.Title, d.Version, d.Requirements = m.Title, m.Version, m.Requirements
+			if m.Provider != "" {
+				s.Label = m.Provider
+			}
+		}
+		s.Docs = append(s.Docs, d)
+		v.Documents++
+		v.Requirements += d.Requirements
+	}
+	v.Sections = append(v.Sections, s)
+}
+
+// documents flattens the documents under nodes, keeping their order.
+func documents(nodes []*catalog.Node) []*catalog.Node {
+	var out []*catalog.Node
+	for _, n := range nodes {
+		if n.IsDir() {
+			out = append(out, documents(n.Children)...)
+		} else {
+			out = append(out, n)
+		}
+	}
+	return out
 }
 
 func view(docs fs.FS) http.HandlerFunc {
@@ -57,10 +125,16 @@ func view(docs fs.FS) http.HandlerFunc {
 			serverError(w, err)
 			return
 		}
+		meta, err := catalog.Describe(p, content)
+		if err != nil {
+			serverError(w, err)
+			return
+		}
 		render(w, viewTmpl, struct {
 			FilePath string
+			Meta     *catalog.Meta
 			Content  any
-		}{p, content})
+		}{p, meta, content})
 	}
 }
 
