@@ -3,6 +3,8 @@
 This tool collects and displays security compliance documents from various cloud providers.
 It provides an easy-to-use interface for viewing the contents of these documents.
 
+![Security Compliance Docs Collector](assets/screenshot.png)
+
 ### Environment
 
 - Go 1.24+ (standard library only, no external dependencies)
@@ -78,7 +80,7 @@ make fmt    # gofmt -w .
 
 ### Features
 
-- Display a list of security compliance documents organized by cloud provider
+- Display a list of security compliance documents organized by cloud provider, newest version first with requirement counts
 - View the contents of JSON-formatted compliance documents in an interactive tree structure
 - Easy navigation between document list and individual document views
 - Document access is confined to the docs directory (`os.Root`), so path traversal requests are rejected
