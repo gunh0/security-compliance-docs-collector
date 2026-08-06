@@ -12,7 +12,8 @@ import (
 func newTestServer(t *testing.T) *httptest.Server {
 	t.Helper()
 	docs := fstest.MapFS{
-		"aws/cis_v3.0.0.json": {Data: []byte(`{"Framework":"CIS","Note":"</script><script>alert(1)</script>"}`)},
+		"aws/cis_v3.0.0.json": {Data: []byte(`{"Framework":"CIS","Provider":"AWS","Note":"</script><script>alert(1)</script>","Requirements":[{},{}]}`)},
+		"aws/cis_v1.4.0.json": {Data: []byte(`{"Framework":"CIS","Provider":"AWS","Requirements":[{}]}`)},
 		"aws/notes.txt":       {Data: []byte("not a document")},
 	}
 	srv := httptest.NewServer(NewHandler(docs))
@@ -47,6 +48,15 @@ func TestIndex(t *testing.T) {
 	if strings.Contains(body, "notes.txt") {
 		t.Error("index lists a non-JSON file")
 	}
+	// Newest version first, marked as latest; totals cover every document.
+	latest := strings.Index(body, "v3.0.0")
+	older := strings.Index(body, "v1.4.0")
+	if latest < 0 || older < 0 || latest > older {
+		t.Errorf("versions not listed newest first:\n%s", body)
+	}
+	if strings.Count(body, "pill-latest") != 1 || !strings.Contains(body, "<dd>3</dd>") {
+		t.Errorf("unexpected latest badge or requirement total:\n%s", body)
+	}
 }
 
 func TestView(t *testing.T) {
@@ -55,6 +65,9 @@ func TestView(t *testing.T) {
 	code, body := get(t, srv.URL+"/view/aws/cis_v3.0.0.json")
 	if code != http.StatusOK {
 		t.Fatalf("status = %d", code)
+	}
+	if !strings.Contains(body, "<dd>2</dd>") {
+		t.Errorf("requirement count not shown:\n%s", body)
 	}
 	if !strings.Contains(body, `"Framework":"CIS"`) {
 		t.Errorf("document content not embedded:\n%s", body)

@@ -3,7 +3,8 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>View File - {{.FilePath}}</title>
+        <title>{{.Meta.Title}} {{with .Meta.Version}}v{{.}}{{end}} · Compliance Docs Collector</title>
+        <link rel="icon" href="data:,">
         <link rel="stylesheet" href="/static/style.css">
         <script
             src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.9.2/jsoneditor.min.js"></script>
@@ -11,11 +12,25 @@
             href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.9.2/jsoneditor.min.css">
     </head>
     <body>
-        <div class="container">
-            <h1>File: {{.FilePath}}</h1>
-            <a href="/">Back to Documents List</a>
+        <header class="hero hero-compact">
+            <div class="container">
+                <a class="back" href="/">&larr; All documents</a>
+                {{with .Meta}}
+                <p class="eyebrow">{{with .Framework}}{{.}} · {{end}}{{.Provider}}</p>
+                <h1>{{.Title}} {{with .Version}}<span class="pill">v{{.}}</span>{{end}}</h1>
+                {{with .Description}}<p class="lead">{{.}}</p>{{end}}
+                <dl class="stats">
+                    <div><dt>Requirements</dt><dd>{{.Requirements}}</dd></div>
+                    <div><dt>File</dt><dd class="mono">{{$.FilePath}}</dd></div>
+                </dl>
+                {{end}}
+            </div>
+        </header>
+
+        <main class="container">
             <div id="json-viewer"></div>
-        </div>
+        </main>
+
         <script>
         document.addEventListener('DOMContentLoaded', function() {
             const container = document.getElementById('json-viewer');

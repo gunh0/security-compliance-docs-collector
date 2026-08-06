@@ -4,31 +4,46 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Security Compliance Docs Collector</title>
+        <link rel="icon" href="data:,">
         <link rel="stylesheet" href="/static/style.css">
     </head>
     <body>
-        <div class="container">
-            <h1>Security Compliance Docs Collector</h1>
-            <p>This tool displays security compliance documents from various
-                cloud providers.</p>
+        <header class="hero">
+            <div class="container">
+                <p class="eyebrow">Security Compliance</p>
+                <h1>Compliance Docs Collector</h1>
+                <p class="lead">CIS Benchmarks for cloud and container platforms,
+                    collected and browsable in one place.</p>
+                <dl class="stats">
+                    <div><dt>Documents</dt><dd>{{.Documents}}</dd></div>
+                    <div><dt>Providers</dt><dd>{{len .Sections}}</dd></div>
+                    <div><dt>Requirements</dt><dd>{{.Requirements}}</dd></div>
+                </dl>
+            </div>
+        </header>
 
-            <h2>Documents List</h2>
-            {{template "tree" .}}
-        </div>
+        <main class="container">
+            {{range .Sections}}
+            <section class="provider provider-{{.Name}}">
+                <h2>{{.Label}} <span class="count">{{len .Docs}}</span></h2>
+                <ul class="doc-list">
+                    {{range .Docs}}
+                    <li>
+                        <a class="doc" href="/view/{{.Path}}">
+                            <span class="doc-title">{{.Title}}</span>
+                            <span class="doc-meta">
+                                {{if .Version}}<span class="pill">v{{.Version}}</span>{{end}}
+                                {{if .Latest}}<span class="pill pill-latest">Latest</span>{{end}}
+                                {{if .Requirements}}<span>{{.Requirements}} requirements</span>{{end}}
+                            </span>
+                        </a>
+                    </li>
+                    {{end}}
+                </ul>
+            </section>
+            {{else}}
+            <p class="empty">No documents found. Run <code>make collect</code> to fetch them.</p>
+            {{end}}
+        </main>
     </body>
 </html>
-
-{{define "tree"}}
-<ul class="file-tree">
-    {{range .}}
-    <li>
-        {{if .IsDir}}
-        <span class="folder">{{.Name}}</span>
-        {{template "tree" .Children}}
-        {{else}}
-        <a href="/view/{{.Path}}">{{.Name}}</a>
-        {{end}}
-    </li>
-    {{end}}
-</ul>
-{{end}}
