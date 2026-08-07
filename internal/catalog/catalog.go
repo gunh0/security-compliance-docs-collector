@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/gunh0/security-compliance-docs-collector/internal/manifest"
 )
 
 // ErrNotFound is returned when a requested document does not exist or is
@@ -193,5 +195,5 @@ func Read(fsys fs.FS, p string) (json.RawMessage, error) {
 }
 
 func isDocument(p string) bool {
-	return strings.HasSuffix(p, ".json")
+	return strings.HasSuffix(p, ".json") && p != manifest.File
 }

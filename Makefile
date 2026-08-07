@@ -15,6 +15,9 @@ collect:
 collect-all:
 	go run ./cmd/collect -all
 
+refresh:
+	go run ./cmd/collect -all -refresh
+
 test:
 	go test ./...
 
@@ -24,4 +27,4 @@ fmt:
 vet:
 	go vet ./...
 
-.PHONY: run build collect collect-all test fmt vet
+.PHONY: run build collect collect-all refresh test fmt vet

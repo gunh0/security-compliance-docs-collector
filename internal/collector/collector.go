@@ -10,12 +10,16 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/gunh0/security-compliance-docs-collector/internal/manifest"
 )
 
 const maxDocumentSize = 16 << 20
@@ -39,6 +43,7 @@ var Providers = []Provider{
 // one sub-directory per provider.
 type Source struct {
 	APIBase string // e.g. https://api.github.com
+	RawBase string // e.g. https://raw.githubusercontent.com
 	Repo    string // owner/name
 	Ref     string // branch, tag or commit
 	Dir     string // path of the compliance directory in the repository
@@ -50,6 +55,7 @@ type Source struct {
 func Prowler() *Source {
 	return &Source{
 		APIBase: "https://api.github.com",
+		RawBase: "https://raw.githubusercontent.com",
 		Repo:    "prowler-cloud/prowler",
 		Ref:     "master",
 		Dir:     "prowler/compliance",
@@ -59,9 +65,9 @@ func Prowler() *Source {
 
 // Benchmark is one version of a provider's CIS benchmark in the source.
 type Benchmark struct {
-	Provider    Provider
-	Version     Version
-	DownloadURL string
+	Provider Provider
+	Version  Version
+	Path     string // path of the document in the source repository
 }
 
 // FileName is the local file name of the benchmark.
@@ -69,18 +75,29 @@ func (b Benchmark) FileName() string {
 	return fmt.Sprintf("%s_v%s.json", b.Provider.FilePrefix, b.Version)
 }
 
+// LocalPath is the slash-separated path of the benchmark in the docs root.
+func (b Benchmark) LocalPath() string {
+	return b.Provider.Name + "/" + b.FileName()
+}
+
+// Revision is the upstream commit that last changed a document.
+type Revision struct {
+	SHA  string
+	Date time.Time
+}
+
 // List returns the CIS benchmarks of p in the source, oldest first.
 func (s *Source) List(ctx context.Context, p Provider) ([]Benchmark, error) {
-	url := fmt.Sprintf("%s/repos/%s/contents/%s/%s?ref=%s", s.APIBase, s.Repo, s.Dir, p.Name, s.Ref)
-	body, err := s.get(ctx, url, "application/vnd.github+json")
+	dir := s.Dir + "/" + p.Name
+	u := fmt.Sprintf("%s/repos/%s/contents/%s?ref=%s", s.APIBase, s.Repo, dir, url.QueryEscape(s.Ref))
+	body, err := s.get(ctx, u, "application/vnd.github+json")
 	if err != nil {
 		return nil, err
 	}
 
 	var entries []struct {
-		Name        string `json:"name"`
-		Type        string `json:"type"`
-		DownloadURL string `json:"download_url"`
+		Name string `json:"name"`
+		Type string `json:"type"`
 	}
 	if err := json.Unmarshal(body, &entries); err != nil {
 		return nil, fmt.Errorf("list %s: %w", p.Name, err)
@@ -97,17 +114,50 @@ func (s *Source) List(ctx context.Context, p Provider) ([]Benchmark, error) {
 		if err != nil {
 			return nil, err
 		}
-		benchmarks = append(benchmarks, Benchmark{Provider: p, Version: v, DownloadURL: e.DownloadURL})
+		benchmarks = append(benchmarks, Benchmark{Provider: p, Version: v, Path: dir + "/" + e.Name})
 	}
 
 	sort.Slice(benchmarks, func(i, j int) bool { return benchmarks[i].Version.Less(benchmarks[j].Version) })
 	return benchmarks, nil
 }
 
-// Fetch downloads b, checks that it is the expected CIS document and returns
-// it indented with four spaces, like the rest of the docs directory.
-func (s *Source) Fetch(ctx context.Context, b Benchmark) ([]byte, error) {
-	body, err := s.get(ctx, b.DownloadURL, "")
+// Revision returns the latest commit, reachable from the source ref, that
+// changed b.
+func (s *Source) Revision(ctx context.Context, b Benchmark) (Revision, error) {
+	u := fmt.Sprintf("%s/repos/%s/commits?path=%s&sha=%s&per_page=1",
+		s.APIBase, s.Repo, url.QueryEscape(b.Path), url.QueryEscape(s.Ref))
+	body, err := s.get(ctx, u, "application/vnd.github+json")
+	if err != nil {
+		return Revision{}, err
+	}
+
+	var commits []struct {
+		SHA    string `json:"sha"`
+		Commit struct {
+			Committer struct {
+				Date time.Time `json:"date"`
+			} `json:"committer"`
+		} `json:"commit"`
+	}
+	if err := json.Unmarshal(body, &commits); err != nil {
+		return Revision{}, fmt.Errorf("history of %s: %w", b.Path, err)
+	}
+	if len(commits) == 0 {
+		return Revision{}, fmt.Errorf("history of %s: no commits", b.Path)
+	}
+	return Revision{SHA: commits[0].SHA, Date: commits[0].Commit.Committer.Date}, nil
+}
+
+// SourceURL links to b as of rev.
+func (s *Source) SourceURL(b Benchmark, rev Revision) string {
+	return fmt.Sprintf("https://github.com/%s/blob/%s/%s", s.Repo, rev.SHA, b.Path)
+}
+
+// Fetch downloads b as of rev, checks that it is the expected CIS document
+// and returns it indented with four spaces, like the rest of the docs
+// directory.
+func (s *Source) Fetch(ctx context.Context, b Benchmark, rev Revision) ([]byte, error) {
+	body, err := s.get(ctx, fmt.Sprintf("%s/%s/%s/%s", s.RawBase, s.Repo, rev.SHA, b.Path), "")
 	if err != nil {
 		return nil, err
 	}
@@ -141,17 +191,54 @@ func (s *Source) Fetch(ctx context.Context, b Benchmark) ([]byte, error) {
 	return out.Bytes(), nil
 }
 
-// Result reports what Sync did with one benchmark.
-type Result struct {
-	Path  string
-	Added bool // false if the file already existed
+// Status is what Sync did with one document.
+type Status int
+
+const (
+	UpToDate Status = iota // stored revision matches upstream
+	Outdated               // upstream has a newer revision; run with Refresh
+	Added                  // newly stored
+	Updated                // replaced with the upstream revision
+)
+
+func (st Status) String() string {
+	return [...]string{"up to date", "outdated", "added", "updated"}[st]
 }
 
-// Sync stores the benchmarks of each provider under docsDir/<provider>/.
-// Only the latest version is collected unless all is set. Existing files
-// are left untouched.
-func Sync(ctx context.Context, s *Source, docsDir string, providers []Provider, all bool) ([]Result, error) {
-	var results []Result
+// Result reports what Sync did with one document.
+type Result struct {
+	Path   string // slash-separated path relative to the docs root
+	Status Status
+}
+
+// Options control Sync.
+type Options struct {
+	All     bool             // collect every version, not only the latest
+	Refresh bool             // replace documents whose upstream revision changed
+	Match   string           // only handle documents whose path contains Match
+	Now     func() time.Time // clock for the collection date; defaults to time.Now
+}
+
+// Sync stores the benchmarks of each provider under docsDir/<provider>/ and
+// records their upstream revision in the manifest. Existing documents are
+// only replaced when opts.Refresh is set.
+func Sync(ctx context.Context, s *Source, docsDir string, providers []Provider, opts Options) (results []Result, err error) {
+	if opts.Now == nil {
+		opts.Now = time.Now
+	}
+	m, err := manifest.Load(os.DirFS(docsDir))
+	if err != nil {
+		return nil, err
+	}
+	changed := false
+	defer func() {
+		if changed {
+			if saveErr := m.Save(docsDir); err == nil {
+				err = saveErr
+			}
+		}
+	}()
+
 	for _, p := range providers {
 		benchmarks, err := s.List(ctx, p)
 		if err != nil {
@@ -160,30 +247,55 @@ func Sync(ctx context.Context, s *Source, docsDir string, providers []Provider, 
 		if len(benchmarks) == 0 {
 			return results, fmt.Errorf("no CIS benchmarks found for %s", p.Name)
 		}
-		if !all {
+		if !opts.All {
 			benchmarks = benchmarks[len(benchmarks)-1:]
 		}
 
 		for _, b := range benchmarks {
-			path := filepath.Join(docsDir, p.Name, b.FileName())
-			if _, err := os.Stat(path); err == nil {
-				results = append(results, Result{Path: path})
+			local := b.LocalPath()
+			if !strings.Contains(local, opts.Match) {
 				continue
+			}
+			rev, err := s.Revision(ctx, b)
+			if err != nil {
+				return results, err
+			}
+
+			file := filepath.Join(docsDir, filepath.FromSlash(local))
+			status := Added
+			if _, err := os.Stat(file); err == nil {
+				switch {
+				case m[local].Revision == rev.SHA:
+					status = UpToDate
+				case opts.Refresh:
+					status = Updated
+				default:
+					status = Outdated
+				}
 			} else if !errors.Is(err, os.ErrNotExist) {
 				return results, err
 			}
 
-			data, err := s.Fetch(ctx, b)
-			if err != nil {
-				return results, err
+			if status == Added || status == Updated {
+				data, err := s.Fetch(ctx, b, rev)
+				if err != nil {
+					return results, err
+				}
+				if err := os.MkdirAll(filepath.Dir(file), 0o755); err != nil {
+					return results, err
+				}
+				if err := os.WriteFile(file, data, 0o644); err != nil {
+					return results, err
+				}
+				m[local] = manifest.Entry{
+					Source:    s.SourceURL(b, rev),
+					Revision:  rev.SHA,
+					Updated:   rev.Date.UTC().Format(time.DateOnly),
+					Collected: opts.Now().Format(time.DateOnly),
+				}
+				changed = true
 			}
-			if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-				return results, err
-			}
-			if err := os.WriteFile(path, data, 0o644); err != nil {
-				return results, err
-			}
-			results = append(results, Result{Path: path, Added: true})
+			results = append(results, Result{Path: local, Status: status})
 		}
 	}
 	return results, nil
