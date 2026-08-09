@@ -196,6 +196,22 @@ body {
   font-size: 0.85rem;
 }
 
+.doc-updated {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.source {
+  margin: 16px 0 0;
+  color: var(--hero-muted);
+  font-size: 0.8rem;
+  word-break: break-all;
+}
+
+.source a {
+  color: var(--hero-text);
+}
+
 .pill {
   display: inline-block;
   padding: 1px 8px;
@@ -207,7 +223,23 @@ body {
   vertical-align: middle;
 }
 
-.hero .pill {
+.hero .doc-updated {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.source {
+  margin: 16px 0 0;
+  color: var(--hero-muted);
+  font-size: 0.8rem;
+  word-break: break-all;
+}
+
+.source a {
+  color: var(--hero-text);
+}
+
+.pill {
   border-color: rgba(255, 255, 255, 0.3);
   color: var(--hero-text);
 }

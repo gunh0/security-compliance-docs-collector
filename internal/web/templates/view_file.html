@@ -21,8 +21,11 @@
                 {{with .Description}}<p class="lead">{{.}}</p>{{end}}
                 <dl class="stats">
                     <div><dt>Requirements</dt><dd>{{.Requirements}}</dd></div>
+                    {{with .Updated}}<div><dt>Last updated</dt><dd><time datetime="{{.}}">{{.}}</time></dd></div>{{end}}
+                    {{with .Collected}}<div><dt>Collected</dt><dd><time datetime="{{.}}">{{.}}</time></dd></div>{{end}}
                     <div><dt>File</dt><dd class="mono">{{$.FilePath}}</dd></div>
                 </dl>
+                {{with .Source}}<p class="source">Source: <a href="{{.}}" rel="noopener">{{.}}</a></p>{{end}}
                 {{end}}
             </div>
         </header>

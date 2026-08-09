@@ -36,6 +36,7 @@
                                 {{if .Latest}}<span class="pill pill-latest">Latest</span>{{end}}
                                 {{if .Requirements}}<span>{{.Requirements}} requirements</span>{{end}}
                             </span>
+                            {{with .Updated}}<span class="doc-updated">Updated <time datetime="{{.}}">{{.}}</time></span>{{end}}
                         </a>
                     </li>
                     {{end}}
