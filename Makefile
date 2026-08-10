@@ -18,6 +18,10 @@ collect-all:
 refresh:
 	go run ./cmd/collect -all -refresh
 
+docker:
+	docker build -t security-compliance-docs-collector .
+	docker run --rm -p 8080:8080 security-compliance-docs-collector
+
 test:
 	go test ./...
 
@@ -27,4 +31,4 @@ fmt:
 vet:
 	go vet ./...
 
-.PHONY: run build collect collect-all refresh test fmt vet
+.PHONY: run build collect collect-all refresh docker test fmt vet
