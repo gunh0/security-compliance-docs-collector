@@ -15,6 +15,7 @@ func newTestServer(t *testing.T) *httptest.Server {
 		"aws/cis_v3.0.0.json": {Data: []byte(`{"Framework":"CIS","Provider":"AWS","Note":"</script><script>alert(1)</script>","Requirements":[{},{}]}`)},
 		"aws/cis_v1.4.0.json": {Data: []byte(`{"Framework":"CIS","Provider":"AWS","Requirements":[{}]}`)},
 		"aws/notes.txt":       {Data: []byte("not a document")},
+		"manifest.json":       {Data: []byte(`{"aws/cis_v3.0.0.json":{"source":"https://github.com/prowler-cloud/prowler/blob/abc/prowler/compliance/aws/cis_3.0_aws.json","revision":"abc","updated":"2026-07-09","collected":"2026-07-10"}}`)},
 	}
 	srv := httptest.NewServer(NewHandler(docs))
 	t.Cleanup(srv.Close)
@@ -54,6 +55,12 @@ func TestIndex(t *testing.T) {
 	if latest < 0 || older < 0 || latest > older {
 		t.Errorf("versions not listed newest first:\n%s", body)
 	}
+	if !strings.Contains(body, `Updated <time datetime="2026-07-09">`) {
+		t.Errorf("last updated date not shown:\n%s", body)
+	}
+	if strings.Contains(body, "manifest.json") {
+		t.Error("index lists the manifest")
+	}
 	if strings.Count(body, "pill-latest") != 1 || !strings.Contains(body, "<dd>3</dd>") {
 		t.Errorf("unexpected latest badge or requirement total:\n%s", body)
 	}
@@ -65,6 +72,11 @@ func TestView(t *testing.T) {
 	code, body := get(t, srv.URL+"/view/aws/cis_v3.0.0.json")
 	if code != http.StatusOK {
 		t.Fatalf("status = %d", code)
+	}
+	for _, want := range []string{"Last updated", "2026-07-09", "Collected", "2026-07-10", "blob/abc/prowler/compliance/aws/cis_3.0_aws.json"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("viewer does not show %q", want)
+		}
 	}
 	if !strings.Contains(body, "<dd>2</dd>") {
 		t.Errorf("requirement count not shown:\n%s", body)

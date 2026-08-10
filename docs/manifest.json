@@ -1,0 +1,62 @@
+{
+  "aws/cis_amazon_web_services_foundations_benchmark_v1.4.0.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/fe7e6675e0fbd334855b86992c062bd0fe9a833c/prowler/compliance/aws/cis_1.4_aws.json",
+    "revision": "fe7e6675e0fbd334855b86992c062bd0fe9a833c",
+    "updated": "2026-06-26",
+    "collected": "2026-08-08"
+  },
+  "aws/cis_amazon_web_services_foundations_benchmark_v3.0.0.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/f19106281be6f3834d8b9818f128892f6290b93b/prowler/compliance/aws/cis_3.0_aws.json",
+    "revision": "f19106281be6f3834d8b9818f128892f6290b93b",
+    "updated": "2026-08-03",
+    "collected": "2026-08-08"
+  },
+  "aws/cis_amazon_web_services_foundations_benchmark_v7.0.0.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/1ee4de18be50ce41ca9d441f7d3d2238fdc231e9/prowler/compliance/aws/cis_7.0_aws.json",
+    "revision": "1ee4de18be50ce41ca9d441f7d3d2238fdc231e9",
+    "updated": "2026-07-09",
+    "collected": "2026-08-08"
+  },
+  "azure/cis_microsoft_azure_foundations_benchmark_v2.0.0.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/b9298b4023f14cf5e119468c7e19914b5cd5a97b/prowler/compliance/azure/cis_2.0_azure.json",
+    "revision": "b9298b4023f14cf5e119468c7e19914b5cd5a97b",
+    "updated": "2026-06-22",
+    "collected": "2026-08-08"
+  },
+  "azure/cis_microsoft_azure_foundations_benchmark_v2.1.0.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/6ca8e726f73abf625931ccedf188c3b4fff0e2b8/prowler/compliance/azure/cis_2.1_azure.json",
+    "revision": "6ca8e726f73abf625931ccedf188c3b4fff0e2b8",
+    "updated": "2026-05-25",
+    "collected": "2026-08-08"
+  },
+  "azure/cis_microsoft_azure_foundations_benchmark_v6.0.0.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/dc432c8c3adb42e8f26526e95f71de4de278b189/prowler/compliance/azure/cis_6.0_azure.json",
+    "revision": "dc432c8c3adb42e8f26526e95f71de4de278b189",
+    "updated": "2026-06-29",
+    "collected": "2026-08-08"
+  },
+  "gcp/cis_google_cloud_platform_foundation_benchmark_v2.0.0.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/9a50dffaa0db93d80f8a586e994dc7131d73b0ea/prowler/compliance/gcp/cis_2.0_gcp.json",
+    "revision": "9a50dffaa0db93d80f8a586e994dc7131d73b0ea",
+    "updated": "2026-06-09",
+    "collected": "2026-08-08"
+  },
+  "gcp/cis_google_cloud_platform_foundation_benchmark_v5.0.0.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/ed04257e6c90f82d7758ee7e6779be60cb1a9219/prowler/compliance/gcp/cis_5.0_gcp.json",
+    "revision": "ed04257e6c90f82d7758ee7e6779be60cb1a9219",
+    "updated": "2026-06-29",
+    "collected": "2026-08-08"
+  },
+  "kubernetes/cis_kubernetes_benchmark_v1.8.0.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/fe7e6675e0fbd334855b86992c062bd0fe9a833c/prowler/compliance/kubernetes/cis_1.8_kubernetes.json",
+    "revision": "fe7e6675e0fbd334855b86992c062bd0fe9a833c",
+    "updated": "2026-06-26",
+    "collected": "2026-08-08"
+  },
+  "kubernetes/cis_kubernetes_benchmark_v2.0.1.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/5404863a3e49c738416cda07df8689a15c818feb/prowler/compliance/kubernetes/cis_2.0.1_kubernetes.json",
+    "revision": "5404863a3e49c738416cda07df8689a15c818feb",
+    "updated": "2026-06-29",
+    "collected": "2026-08-08"
+  }
+}

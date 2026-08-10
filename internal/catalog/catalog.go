@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/gunh0/security-compliance-docs-collector/internal/manifest"
 )
 
 // ErrNotFound is returned when a requested document does not exist or is
@@ -34,6 +36,11 @@ type Meta struct {
 	Provider     string
 	Description  string
 	Requirements int
+
+	// From the manifest; empty for documents that were not collected.
+	Updated   string // date the upstream document last changed
+	Collected string // date the document was stored
+	Source    string // upstream URL
 }
 
 // IsDir reports whether the node is a folder.
@@ -42,10 +49,14 @@ func (n *Node) IsDir() bool { return n.Children != nil }
 // Build walks fsys and returns the top-level folders and documents.
 // Only .json files are included; empty folders are dropped.
 func Build(fsys fs.FS) ([]*Node, error) {
-	return build(fsys, ".")
+	m, err := manifest.Load(fsys)
+	if err != nil {
+		return nil, err
+	}
+	return build(fsys, ".", m)
 }
 
-func build(fsys fs.FS, dir string) ([]*Node, error) {
+func build(fsys fs.FS, dir string, m manifest.Manifest) ([]*Node, error) {
 	entries, err := fs.ReadDir(fsys, dir)
 	if err != nil {
 		return nil, err
@@ -56,7 +67,7 @@ func build(fsys fs.FS, dir string) ([]*Node, error) {
 		p := path.Join(dir, e.Name())
 		switch {
 		case e.IsDir():
-			children, err := build(fsys, p)
+			children, err := build(fsys, p, m)
 			if err != nil {
 				return nil, err
 			}
@@ -64,7 +75,7 @@ func build(fsys fs.FS, dir string) ([]*Node, error) {
 				nodes = append(nodes, &Node{Name: e.Name(), Path: p, Children: children})
 			}
 		case isDocument(p):
-			nodes = append(nodes, &Node{Name: e.Name(), Path: p, Meta: readMeta(fsys, p)})
+			nodes = append(nodes, &Node{Name: e.Name(), Path: p, Meta: readMeta(fsys, p, m)})
 		}
 	}
 
@@ -80,21 +91,35 @@ func build(fsys fs.FS, dir string) ([]*Node, error) {
 // fileNamePattern matches names such as "cis_kubernetes_benchmark_v1.8.0.json".
 var fileNamePattern = regexp.MustCompile(`^(.+)_v(\d+(?:\.\d+)*)\.json$`)
 
-// Describe summarizes the document stored at p, as returned by Read.
-func Describe(p string, doc json.RawMessage) (*Meta, error) {
-	return describe(path.Base(p), doc)
+// Describe summarizes the document stored at p in fsys, as returned by Read.
+func Describe(fsys fs.FS, p string, doc json.RawMessage) (*Meta, error) {
+	m, err := manifest.Load(fsys)
+	if err != nil {
+		return nil, err
+	}
+	meta, err := describe(path.Base(p), doc)
+	if err != nil {
+		return nil, err
+	}
+	meta.addSource(m[p])
+	return meta, nil
 }
 
-func readMeta(fsys fs.FS, p string) *Meta {
+func readMeta(fsys fs.FS, p string, m manifest.Manifest) *Meta {
 	b, err := fs.ReadFile(fsys, p)
 	if err != nil {
 		return nil
 	}
-	m, err := describe(path.Base(p), b)
+	meta, err := describe(path.Base(p), b)
 	if err != nil {
 		return nil
 	}
-	return m
+	meta.addSource(m[p])
+	return meta
+}
+
+func (meta *Meta) addSource(e manifest.Entry) {
+	meta.Updated, meta.Collected, meta.Source = e.Updated, e.Collected, e.Source
 }
 
 func describe(name string, b []byte) (*Meta, error) {
@@ -193,5 +218,5 @@ func Read(fsys fs.FS, p string) (json.RawMessage, error) {
 }
 
 func isDocument(p string) bool {
-	return strings.HasSuffix(p, ".json")
+	return strings.HasSuffix(p, ".json") && p != manifest.File
 }

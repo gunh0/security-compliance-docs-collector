@@ -14,6 +14,7 @@ func testFS() fstest.MapFS {
 		"azure/cis_v2.1.0.json": {Data: []byte(`{"Version":"2.1"}`)},
 		"empty/readme.md":       {Data: []byte("ignored")},
 		"broken.json":           {Data: []byte(`{"Version":`)},
+		"manifest.json":         {Data: []byte(`{}`)},
 	}
 }
 
@@ -57,6 +58,7 @@ func TestRead(t *testing.T) {
 		"/aws/cis_v3.0.0.json",
 		"aws/notes.txt",
 		"aws/missing.json",
+		"manifest.json",
 	} {
 		if _, err := Read(fsys, p); !errors.Is(err, ErrNotFound) {
 			t.Errorf("Read(%q) error = %v, want ErrNotFound", p, err)

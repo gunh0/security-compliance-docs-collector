@@ -51,6 +51,7 @@ type docView struct {
 	Title        string
 	Version      string
 	Requirements int
+	Updated      string
 	Latest       bool
 }
 
@@ -88,7 +89,7 @@ func (v *indexView) addSection(name string, nodes []*catalog.Node) {
 		n := nodes[i]
 		d := docView{Path: n.Path, Title: n.Name, Latest: len(s.Docs) == 0}
 		if m := n.Meta; m != nil {
-			d.Title, d.Version, d.Requirements = m.Title, m.Version, m.Requirements
+			d.Title, d.Version, d.Requirements, d.Updated = m.Title, m.Version, m.Requirements, m.Updated
 			if m.Provider != "" {
 				s.Label = m.Provider
 			}
@@ -125,7 +126,7 @@ func view(docs fs.FS) http.HandlerFunc {
 			serverError(w, err)
 			return
 		}
-		meta, err := catalog.Describe(p, content)
+		meta, err := catalog.Describe(docs, p, content)
 		if err != nil {
 			serverError(w, err)
 			return
