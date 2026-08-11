@@ -155,11 +155,12 @@ func (s *Source) SourceURL(b Benchmark, rev Revision) string {
 
 // Fetch downloads b as of rev, checks that it is the expected CIS document
 // and returns it indented with four spaces, like the rest of the docs
-// directory.
-func (s *Source) Fetch(ctx context.Context, b Benchmark, rev Revision) ([]byte, error) {
+// directory, together with the version stated in the document. That version
+// may be more precise than the file name, e.g. 4.0.1 in cis_4.0_aws.json.
+func (s *Source) Fetch(ctx context.Context, b Benchmark, rev Revision) ([]byte, Version, error) {
 	body, err := s.get(ctx, fmt.Sprintf("%s/%s/%s/%s", s.RawBase, s.Repo, rev.SHA, b.Path), "")
 	if err != nil {
-		return nil, err
+		return nil, Version{}, err
 	}
 
 	var doc struct {
@@ -169,26 +170,26 @@ func (s *Source) Fetch(ctx context.Context, b Benchmark, rev Revision) ([]byte, 
 		Requirements []json.RawMessage
 	}
 	if err := json.Unmarshal(body, &doc); err != nil {
-		return nil, fmt.Errorf("%s: %w", b.FileName(), err)
+		return nil, Version{}, fmt.Errorf("%s: %w", b.FileName(), err)
 	}
 	v, err := ParseVersion(doc.Version)
 	switch {
 	case doc.Framework != "CIS":
-		return nil, fmt.Errorf("%s: framework is %q, want CIS", b.FileName(), doc.Framework)
+		return nil, v, fmt.Errorf("%s: framework is %q, want CIS", b.FileName(), doc.Framework)
 	case !strings.EqualFold(doc.Provider, b.Provider.Label):
-		return nil, fmt.Errorf("%s: provider is %q, want %s", b.FileName(), doc.Provider, b.Provider.Label)
-	case err != nil || v.Compare(b.Version) != 0:
-		return nil, fmt.Errorf("%s: document version is %q", b.FileName(), doc.Version)
+		return nil, v, fmt.Errorf("%s: provider is %q, want %s", b.FileName(), doc.Provider, b.Provider.Label)
+	case err != nil || !v.Refines(b.Version):
+		return nil, v, fmt.Errorf("%s: document version is %q", b.FileName(), doc.Version)
 	case len(doc.Requirements) == 0:
-		return nil, fmt.Errorf("%s: no requirements", b.FileName())
+		return nil, v, fmt.Errorf("%s: no requirements", b.FileName())
 	}
 
 	var out bytes.Buffer
 	if err := json.Indent(&out, body, "", "    "); err != nil {
-		return nil, err
+		return nil, v, err
 	}
 	out.WriteByte('\n')
-	return out.Bytes(), nil
+	return out.Bytes(), v, nil
 }
 
 // Status is what Sync did with one document.
@@ -252,7 +253,10 @@ func Sync(ctx context.Context, s *Source, docsDir string, providers []Provider, 
 		}
 
 		for _, b := range benchmarks {
-			local := b.LocalPath()
+			local, known := m.Find(b.Path)
+			if !known {
+				local = b.LocalPath()
+			}
 			if !strings.Contains(local, opts.Match) {
 				continue
 			}
@@ -277,9 +281,15 @@ func Sync(ctx context.Context, s *Source, docsDir string, providers []Provider, 
 			}
 
 			if status == Added || status == Updated {
-				data, err := s.Fetch(ctx, b, rev)
+				data, v, err := s.Fetch(ctx, b, rev)
 				if err != nil {
 					return results, err
+				}
+				if status == Added && !known {
+					// Name the file after the version stated in the document.
+					b.Version = v
+					local = b.LocalPath()
+					file = filepath.Join(docsDir, filepath.FromSlash(local))
 				}
 				if err := os.MkdirAll(filepath.Dir(file), 0o755); err != nil {
 					return results, err
@@ -366,6 +376,12 @@ func (v Version) Compare(w Version) int {
 		}
 	}
 	return 0
+}
+
+// Refines reports whether v is w or a patch release of w when w has no
+// patch number, e.g. 4.0.1 refines 4.0.0.
+func (v Version) Refines(w Version) bool {
+	return v == w || (w[2] == 0 && v[0] == w[0] && v[1] == w[1])
 }
 
 // Less reports whether v is older than w.

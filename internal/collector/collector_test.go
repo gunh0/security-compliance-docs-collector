@@ -124,7 +124,7 @@ func TestFetchValidates(t *testing.T) {
 	}
 	rev := Revision{SHA: "r"}
 
-	got, err := s.Fetch(context.Background(), benchmarks[0], rev)
+	got, _, err := s.Fetch(context.Background(), benchmarks[0], rev)
 	if err != nil {
 		t.Fatalf("valid document: %v", err)
 	}
@@ -133,7 +133,7 @@ func TestFetchValidates(t *testing.T) {
 	}
 
 	for _, b := range benchmarks[1:] {
-		if _, err := s.Fetch(context.Background(), b, rev); err == nil {
+		if _, _, err := s.Fetch(context.Background(), b, rev); err == nil {
 			t.Errorf("Fetch(%s) succeeded, want error", b.FileName())
 		}
 	}
@@ -206,6 +206,44 @@ func TestSync(t *testing.T) {
 	}
 	if m, _ := manifest.Load(os.DirFS(dir)); m["aws/"+v70].Revision != "r2" {
 		t.Errorf("manifest not refreshed: %+v", m["aws/"+v70])
+	}
+}
+
+func TestSyncPatchVersion(t *testing.T) {
+	// cis_4.0_aws.json holds version 4.0.1 of the benchmark.
+	u := &upstream{
+		revisions: map[string]string{"cis_4.0_aws.json": "r1"},
+		docs:      map[string]string{"r1/cis_4.0_aws.json": doc("AWS", "4.0.1")},
+	}
+	s := u.source(t)
+	dir := t.TempDir()
+
+	for _, want := range []Status{Added, UpToDate} {
+		results, err := Sync(context.Background(), s, dir, []Provider{aws}, Options{Now: fixedClock})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(results) != 1 || results[0].Status != want ||
+			results[0].Path != "aws/cis_amazon_web_services_foundations_benchmark_v4.0.1.json" {
+			t.Fatalf("results = %+v, want %s", results, want)
+		}
+	}
+}
+
+func TestVersionRefines(t *testing.T) {
+	v := func(s string) Version { v, _ := ParseVersion(s); return v }
+	for _, c := range []struct {
+		v, w string
+		want bool
+	}{
+		{"4.0.1", "4.0", true},
+		{"4.0", "4.0", true},
+		{"4.1", "4.0", false},
+		{"2.0.2", "2.0.1", false},
+	} {
+		if got := v(c.v).Refines(v(c.w)); got != c.want {
+			t.Errorf("%s.Refines(%s) = %v", c.v, c.w, got)
+		}
 	}
 }
 
