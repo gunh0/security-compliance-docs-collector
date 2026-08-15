@@ -29,6 +29,12 @@
     "updated": "2026-06-26",
     "collected": "2026-08-14"
   },
+  "aws/cis_amazon_web_services_foundations_benchmark_v5.0.0.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/fe7e6675e0fbd334855b86992c062bd0fe9a833c/prowler/compliance/aws/cis_5.0_aws.json",
+    "revision": "fe7e6675e0fbd334855b86992c062bd0fe9a833c",
+    "updated": "2026-06-26",
+    "collected": "2026-08-15"
+  },
   "aws/cis_amazon_web_services_foundations_benchmark_v7.0.0.json": {
     "source": "https://github.com/prowler-cloud/prowler/blob/1ee4de18be50ce41ca9d441f7d3d2238fdc231e9/prowler/compliance/aws/cis_7.0_aws.json",
     "revision": "1ee4de18be50ce41ca9d441f7d3d2238fdc231e9",
