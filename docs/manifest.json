@@ -59,6 +59,12 @@
     "updated": "2026-05-25",
     "collected": "2026-08-08"
   },
+  "azure/cis_microsoft_azure_foundations_benchmark_v3.0.0.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/6ca8e726f73abf625931ccedf188c3b4fff0e2b8/prowler/compliance/azure/cis_3.0_azure.json",
+    "revision": "6ca8e726f73abf625931ccedf188c3b4fff0e2b8",
+    "updated": "2026-05-25",
+    "collected": "2026-08-18"
+  },
   "azure/cis_microsoft_azure_foundations_benchmark_v6.0.0.json": {
     "source": "https://github.com/prowler-cloud/prowler/blob/dc432c8c3adb42e8f26526e95f71de4de278b189/prowler/compliance/azure/cis_6.0_azure.json",
     "revision": "dc432c8c3adb42e8f26526e95f71de4de278b189",
