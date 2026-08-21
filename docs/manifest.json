@@ -89,6 +89,12 @@
     "updated": "2026-06-09",
     "collected": "2026-08-08"
   },
+  "gcp/cis_google_cloud_platform_foundation_benchmark_v3.0.0.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/9a50dffaa0db93d80f8a586e994dc7131d73b0ea/prowler/compliance/gcp/cis_3.0_gcp.json",
+    "revision": "9a50dffaa0db93d80f8a586e994dc7131d73b0ea",
+    "updated": "2026-06-09",
+    "collected": "2026-08-21"
+  },
   "gcp/cis_google_cloud_platform_foundation_benchmark_v5.0.0.json": {
     "source": "https://github.com/prowler-cloud/prowler/blob/ed04257e6c90f82d7758ee7e6779be60cb1a9219/prowler/compliance/gcp/cis_5.0_gcp.json",
     "revision": "ed04257e6c90f82d7758ee7e6779be60cb1a9219",
