@@ -37,6 +37,8 @@ var Providers = []Provider{
 	{"azure", "Azure", "cis_microsoft_azure_foundations_benchmark"},
 	{"gcp", "GCP", "cis_google_cloud_platform_foundation_benchmark"},
 	{"kubernetes", "Kubernetes", "cis_kubernetes_benchmark"},
+	{"oraclecloud", "OracleCloud", "cis_oracle_cloud_infrastructure_foundations_benchmark"},
+	{"alibabacloud", "AlibabaCloud", "cis_alibaba_cloud_foundations_benchmark"},
 }
 
 // Source is a GitHub repository directory holding compliance documents,

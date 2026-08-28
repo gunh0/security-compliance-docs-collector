@@ -34,6 +34,14 @@ func NewHandler(docs fs.FS) http.Handler {
 	return mux
 }
 
+// providerLabels are display names for provider folders whose document
+// Provider field is not meant for display.
+var providerLabels = map[string]string{
+	"gcp":          "Google Cloud",
+	"oraclecloud":  "Oracle Cloud",
+	"alibabacloud": "Alibaba Cloud",
+}
+
 type indexView struct {
 	Sections     []sectionView
 	Documents    int
@@ -92,6 +100,9 @@ func (v *indexView) addSection(name string, nodes []*catalog.Node) {
 			d.Title, d.Version, d.Requirements, d.Updated = m.Title, m.Version, m.Requirements, m.Updated
 			if m.Provider != "" {
 				s.Label = m.Provider
+			}
+			if label, ok := providerLabels[name]; ok {
+				s.Label = label
 			}
 		}
 		s.Docs = append(s.Docs, d)

@@ -136,6 +136,8 @@ body {
 .provider-azure { --accent: #0078d4; }
 .provider-gcp { --accent: #4285f4; }
 .provider-kubernetes { --accent: #326ce5; }
+.provider-oraclecloud { --accent: #c74634; }
+.provider-alibabacloud { --accent: #ff6a00; }
 
 .provider h2 {
   display: flex;
