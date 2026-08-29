@@ -136,5 +136,11 @@
     "revision": "5404863a3e49c738416cda07df8689a15c818feb",
     "updated": "2026-06-29",
     "collected": "2026-08-08"
+  },
+  "oraclecloud/cis_oracle_cloud_infrastructure_foundations_benchmark_v3.0.0.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/f16f94acf387258ab0c85b33dac08f3757073132/prowler/compliance/oraclecloud/cis_3.0_oraclecloud.json",
+    "revision": "f16f94acf387258ab0c85b33dac08f3757073132",
+    "updated": "2025-11-04",
+    "collected": "2026-08-29"
   }
 }
