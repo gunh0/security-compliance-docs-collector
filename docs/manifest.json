@@ -1,4 +1,10 @@
 {
+  "alibabacloud/cis_alibaba_cloud_foundations_benchmark_v2.0.0.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/fe7e6675e0fbd334855b86992c062bd0fe9a833c/prowler/compliance/alibabacloud/cis_2.0_alibabacloud.json",
+    "revision": "fe7e6675e0fbd334855b86992c062bd0fe9a833c",
+    "updated": "2026-06-26",
+    "collected": "2026-08-31"
+  },
   "aws/cis_amazon_web_services_foundations_benchmark_v1.4.0.json": {
     "source": "https://github.com/prowler-cloud/prowler/blob/fe7e6675e0fbd334855b86992c062bd0fe9a833c/prowler/compliance/aws/cis_1.4_aws.json",
     "revision": "fe7e6675e0fbd334855b86992c062bd0fe9a833c",
