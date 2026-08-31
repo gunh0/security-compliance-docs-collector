@@ -12,10 +12,11 @@ import (
 func newTestServer(t *testing.T) *httptest.Server {
 	t.Helper()
 	docs := fstest.MapFS{
-		"aws/cis_v3.0.0.json": {Data: []byte(`{"Framework":"CIS","Provider":"AWS","Note":"</script><script>alert(1)</script>","Requirements":[{},{}]}`)},
-		"aws/cis_v1.4.0.json": {Data: []byte(`{"Framework":"CIS","Provider":"AWS","Requirements":[{}]}`)},
-		"aws/notes.txt":       {Data: []byte("not a document")},
-		"manifest.json":       {Data: []byte(`{"aws/cis_v3.0.0.json":{"source":"https://github.com/prowler-cloud/prowler/blob/abc/prowler/compliance/aws/cis_3.0_aws.json","revision":"abc","updated":"2026-07-09","collected":"2026-07-10"}}`)},
+		"aws/cis_v3.0.0.json":         {Data: []byte(`{"Framework":"CIS","Provider":"AWS","Note":"</script><script>alert(1)</script>","Requirements":[{},{}]}`)},
+		"aws/cis_v1.4.0.json":         {Data: []byte(`{"Framework":"CIS","Provider":"AWS","Requirements":[{}]}`)},
+		"aws/notes.txt":               {Data: []byte("not a document")},
+		"oraclecloud/cis_v3.1.0.json": {Data: []byte(`{"Framework":"CIS","Provider":"OracleCloud","Requirements":[{}]}`)},
+		"manifest.json":               {Data: []byte(`{"aws/cis_v3.0.0.json":{"source":"https://github.com/prowler-cloud/prowler/blob/abc/prowler/compliance/aws/cis_3.0_aws.json","revision":"abc","updated":"2026-07-09","collected":"2026-07-10"}}`)},
 	}
 	srv := httptest.NewServer(NewHandler(docs))
 	t.Cleanup(srv.Close)
@@ -46,6 +47,9 @@ func TestIndex(t *testing.T) {
 	if !strings.Contains(body, `href="/view/aws/cis_v3.0.0.json"`) {
 		t.Errorf("index does not link the document:\n%s", body)
 	}
+	if !strings.Contains(body, "Oracle Cloud <span") {
+		t.Errorf("provider display name not used:\n%s", body)
+	}
 	if strings.Contains(body, "notes.txt") {
 		t.Error("index lists a non-JSON file")
 	}
@@ -61,7 +65,7 @@ func TestIndex(t *testing.T) {
 	if strings.Contains(body, "manifest.json") {
 		t.Error("index lists the manifest")
 	}
-	if strings.Count(body, "pill-latest") != 1 || !strings.Contains(body, "<dd>3</dd>") {
+	if strings.Count(body, "pill-latest") != 2 || !strings.Contains(body, "<dd>4</dd>") {
 		t.Errorf("unexpected latest badge or requirement total:\n%s", body)
 	}
 }

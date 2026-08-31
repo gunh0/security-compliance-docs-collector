@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // File is the manifest's file name in the docs root.
@@ -23,6 +24,16 @@ type Entry struct {
 // Manifest maps slash-separated document paths, relative to the docs
 // root, to their entries.
 type Manifest map[string]Entry
+
+// Find returns the path of the document collected from upstreamPath.
+func (m Manifest) Find(upstreamPath string) (string, bool) {
+	for p, e := range m {
+		if strings.HasSuffix(e.Source, "/"+upstreamPath) {
+			return p, true
+		}
+	}
+	return "", false
+}
 
 // Load reads the manifest from the docs root. A missing manifest is empty.
 func Load(docs fs.FS) (Manifest, error) {
