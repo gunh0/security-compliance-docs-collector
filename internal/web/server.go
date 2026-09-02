@@ -8,6 +8,8 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"sort"
+	"strings"
 
 	"github.com/gunh0/security-compliance-docs-collector/internal/catalog"
 )
@@ -40,11 +42,32 @@ var providerLabels = map[string]string{
 	"gcp":          "Google Cloud",
 	"oraclecloud":  "Oracle Cloud",
 	"alibabacloud": "Alibaba Cloud",
+	"nhn":          "NHN Cloud",
+}
+
+// frameworkLabels are display names for document Framework fields.
+var frameworkLabels = map[string]string{
+	"ISO27001":               "ISO/IEC 27001",
+	"KISA-ISMS-P":            "KISA ISMS-P",
+	"NIST-800-53-Revision-5": "NIST SP 800-53",
+	"NIST-CSF":               "NIST CSF",
+	"AWS-Foundational-Security-Best-Practices":       "AWS FSBP",
+	"AWS-Well-Architected-Framework-Security-Pillar": "AWS Well-Architected",
+	"SOC2":         "SOC 2",
+	"MITRE-ATTACK": "MITRE ATT&CK",
+}
+
+func frameworkLabel(f string) string {
+	if label, ok := frameworkLabels[f]; ok {
+		return label
+	}
+	return strings.ReplaceAll(f, "-", " ")
 }
 
 type indexView struct {
 	Sections     []sectionView
 	Documents    int
+	Frameworks   int
 	Requirements int
 }
 
@@ -57,11 +80,15 @@ type sectionView struct {
 type docView struct {
 	Path         string
 	Title        string
+	Framework    string
 	Version      string
 	Requirements int
 	Updated      string
 	Latest       bool
 }
+
+// VersionLabel formats the version for display.
+func (d docView) VersionLabel() string { return catalog.VersionLabel(d.Version) }
 
 func index(docs fs.FS) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +101,8 @@ func index(docs fs.FS) http.HandlerFunc {
 	}
 }
 
-// newIndexView groups documents by top-level folder, newest version first.
+// newIndexView groups documents by top-level folder and, within a folder,
+// by framework: CIS first, then by name, newest version first.
 func newIndexView(tree []*catalog.Node) indexView {
 	var v indexView
 	var loose []*catalog.Node
@@ -88,26 +116,55 @@ func newIndexView(tree []*catalog.Node) indexView {
 	if len(loose) > 0 {
 		v.addSection("other", loose)
 	}
+
+	frameworks := map[string]bool{}
+	for _, s := range v.Sections {
+		for _, d := range s.Docs {
+			if d.Framework != "" {
+				frameworks[d.Framework] = true
+			}
+		}
+	}
+	v.Frameworks = len(frameworks)
 	return v
 }
 
 func (v *indexView) addSection(name string, nodes []*catalog.Node) {
 	s := sectionView{Name: name, Label: name}
+	if label, ok := providerLabels[name]; ok {
+		s.Label = label
+	}
+
+	// nodes are in natural order, so walking backwards yields newest first.
+	perFramework := map[string]int{}
 	for i := len(nodes) - 1; i >= 0; i-- {
 		n := nodes[i]
-		d := docView{Path: n.Path, Title: n.Name, Latest: len(s.Docs) == 0}
+		d := docView{Path: n.Path, Title: n.Name}
 		if m := n.Meta; m != nil {
 			d.Title, d.Version, d.Requirements, d.Updated = m.Title, m.Version, m.Requirements, m.Updated
-			if m.Provider != "" {
+			if m.Framework != "" {
+				d.Framework = frameworkLabel(m.Framework)
+			}
+			if _, ok := providerLabels[name]; !ok && m.Provider != "" {
 				s.Label = m.Provider
 			}
-			if label, ok := providerLabels[name]; ok {
-				s.Label = label
-			}
 		}
+		perFramework[d.Framework]++
 		s.Docs = append(s.Docs, d)
 		v.Documents++
 		v.Requirements += d.Requirements
+	}
+
+	sort.SliceStable(s.Docs, func(i, j int) bool {
+		a, b := s.Docs[i].Framework, s.Docs[j].Framework
+		if (a == "CIS") != (b == "CIS") {
+			return a == "CIS"
+		}
+		return a < b
+	})
+	for i := range s.Docs {
+		f := s.Docs[i].Framework
+		s.Docs[i].Latest = perFramework[f] > 1 && (i == 0 || s.Docs[i-1].Framework != f)
 	}
 	v.Sections = append(v.Sections, s)
 }

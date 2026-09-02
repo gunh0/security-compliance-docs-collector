@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{{.Meta.Title}} {{with .Meta.Version}}v{{.}}{{end}} · Compliance Docs Collector</title>
+        <title>{{.Meta.Title}} · Compliance Docs Collector</title>
         <link rel="icon" href="data:,">
         <link rel="stylesheet" href="/static/style.css">
         <script
@@ -17,7 +17,7 @@
                 <a class="back" href="/">&larr; All documents</a>
                 {{with .Meta}}
                 <p class="eyebrow">{{with .Framework}}{{.}} · {{end}}{{.Provider}}</p>
-                <h1>{{.Title}} {{with .Version}}<span class="pill">v{{.}}</span>{{end}}</h1>
+                <h1>{{.Title}} {{with .VersionLabel}}<span class="pill">{{.}}</span>{{end}}</h1>
                 {{with .Description}}<p class="lead">{{.}}</p>{{end}}
                 <dl class="stats">
                     <div><dt>Requirements</dt><dd>{{.Requirements}}</dd></div>

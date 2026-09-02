@@ -12,11 +12,12 @@
             <div class="container">
                 <p class="eyebrow">Security Compliance</p>
                 <h1>Compliance Docs Collector</h1>
-                <p class="lead">CIS Benchmarks for cloud and container platforms,
-                    collected and browsable in one place.</p>
+                <p class="lead">CIS Benchmarks and compliance frameworks for cloud
+                    and container platforms, collected and browsable in one place.</p>
                 <dl class="stats">
                     <div><dt>Documents</dt><dd>{{.Documents}}</dd></div>
                     <div><dt>Providers</dt><dd>{{len .Sections}}</dd></div>
+                    <div><dt>Frameworks</dt><dd>{{.Frameworks}}</dd></div>
                     <div><dt>Requirements</dt><dd>{{.Requirements}}</dd></div>
                 </dl>
             </div>
@@ -30,9 +31,10 @@
                     {{range .Docs}}
                     <li>
                         <a class="doc" href="/view/{{.Path}}">
+                            {{with .Framework}}<span class="framework">{{.}}</span>{{end}}
                             <span class="doc-title">{{.Title}}</span>
                             <span class="doc-meta">
-                                {{if .Version}}<span class="pill">v{{.Version}}</span>{{end}}
+                                {{with .VersionLabel}}<span class="pill">{{.}}</span>{{end}}
                                 {{if .Latest}}<span class="pill pill-latest">Latest</span>{{end}}
                                 {{if .Requirements}}<span>{{.Requirements}} requirements</span>{{end}}
                             </span>

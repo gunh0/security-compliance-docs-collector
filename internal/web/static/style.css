@@ -138,6 +138,7 @@ body {
 .provider-kubernetes { --accent: #326ce5; }
 .provider-oraclecloud { --accent: #c74634; }
 .provider-alibabacloud { --accent: #ff6a00; }
+.provider-nhn { --accent: #125de6; }
 
 .provider h2 {
   display: flex;
@@ -182,6 +183,14 @@ body {
   border-color: var(--accent);
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
   transform: translateY(-2px);
+}
+
+.framework {
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .doc-title {
