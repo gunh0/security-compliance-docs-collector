@@ -53,6 +53,12 @@
     "updated": "2026-07-09",
     "collected": "2026-08-08"
   },
+  "aws/iso27001_2022.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/f19106281be6f3834d8b9818f128892f6290b93b/prowler/compliance/aws/iso27001_2022_aws.json",
+    "revision": "f19106281be6f3834d8b9818f128892f6290b93b",
+    "updated": "2026-08-03",
+    "collected": "2026-09-03"
+  },
   "azure/cis_microsoft_azure_foundations_benchmark_v2.0.0.json": {
     "source": "https://github.com/prowler-cloud/prowler/blob/b9298b4023f14cf5e119468c7e19914b5cd5a97b/prowler/compliance/azure/cis_2.0_azure.json",
     "revision": "b9298b4023f14cf5e119468c7e19914b5cd5a97b",
