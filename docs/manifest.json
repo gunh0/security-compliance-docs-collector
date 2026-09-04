@@ -95,6 +95,12 @@
     "updated": "2026-06-29",
     "collected": "2026-08-08"
   },
+  "azure/iso27001_2022.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/8f35fff255d189d1f4658c85b8bd0f5fefb48398/prowler/compliance/azure/iso27001_2022_azure.json",
+    "revision": "8f35fff255d189d1f4658c85b8bd0f5fefb48398",
+    "updated": "2026-09-03",
+    "collected": "2026-09-04"
+  },
   "gcp/cis_google_cloud_platform_foundation_benchmark_v2.0.0.json": {
     "source": "https://github.com/prowler-cloud/prowler/blob/9a50dffaa0db93d80f8a586e994dc7131d73b0ea/prowler/compliance/gcp/cis_2.0_gcp.json",
     "revision": "9a50dffaa0db93d80f8a586e994dc7131d73b0ea",
