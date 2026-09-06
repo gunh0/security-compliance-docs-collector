@@ -161,6 +161,12 @@
     "updated": "2026-06-29",
     "collected": "2026-08-08"
   },
+  "kubernetes/iso27001_2022.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/8f35fff255d189d1f4658c85b8bd0f5fefb48398/prowler/compliance/kubernetes/iso27001_2022_kubernetes.json",
+    "revision": "8f35fff255d189d1f4658c85b8bd0f5fefb48398",
+    "updated": "2026-09-03",
+    "collected": "2026-09-06"
+  },
   "oraclecloud/cis_oracle_cloud_infrastructure_foundations_benchmark_v3.0.0.json": {
     "source": "https://github.com/prowler-cloud/prowler/blob/f16f94acf387258ab0c85b33dac08f3757073132/prowler/compliance/oraclecloud/cis_3.0_oraclecloud.json",
     "revision": "f16f94acf387258ab0c85b33dac08f3757073132",
