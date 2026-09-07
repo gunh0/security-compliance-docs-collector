@@ -167,6 +167,12 @@
     "updated": "2026-09-03",
     "collected": "2026-09-06"
   },
+  "nhn/iso27001_2022.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/fbda66c6d118b5b6ca940150d61138be1de3c0c0/prowler/compliance/nhn/iso27001_2022_nhn.json",
+    "revision": "fbda66c6d118b5b6ca940150d61138be1de3c0c0",
+    "updated": "2025-09-22",
+    "collected": "2026-09-07"
+  },
   "oraclecloud/cis_oracle_cloud_infrastructure_foundations_benchmark_v3.0.0.json": {
     "source": "https://github.com/prowler-cloud/prowler/blob/f16f94acf387258ab0c85b33dac08f3757073132/prowler/compliance/oraclecloud/cis_3.0_oraclecloud.json",
     "revision": "f16f94acf387258ab0c85b33dac08f3757073132",
