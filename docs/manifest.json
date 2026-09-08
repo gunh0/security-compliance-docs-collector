@@ -59,6 +59,12 @@
     "updated": "2026-08-03",
     "collected": "2026-09-03"
   },
+  "aws/kisa_isms_p_2023_korean.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/8f35fff255d189d1f4658c85b8bd0f5fefb48398/prowler/compliance/aws/kisa_isms_p_2023_korean_aws.json",
+    "revision": "8f35fff255d189d1f4658c85b8bd0f5fefb48398",
+    "updated": "2026-09-03",
+    "collected": "2026-09-08"
+  },
   "azure/cis_microsoft_azure_foundations_benchmark_v2.0.0.json": {
     "source": "https://github.com/prowler-cloud/prowler/blob/b9298b4023f14cf5e119468c7e19914b5cd5a97b/prowler/compliance/azure/cis_2.0_azure.json",
     "revision": "b9298b4023f14cf5e119468c7e19914b5cd5a97b",
