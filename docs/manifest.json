@@ -5,6 +5,12 @@
     "updated": "2026-06-26",
     "collected": "2026-08-31"
   },
+  "aws/aws_foundational_security_best_practices.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/465e35bf549239930447a6689397c98c825258eb/prowler/compliance/aws/aws_foundational_security_best_practices_aws.json",
+    "revision": "465e35bf549239930447a6689397c98c825258eb",
+    "updated": "2026-08-25",
+    "collected": "2026-09-11"
+  },
   "aws/cis_amazon_web_services_foundations_benchmark_v1.4.0.json": {
     "source": "https://github.com/prowler-cloud/prowler/blob/fe7e6675e0fbd334855b86992c062bd0fe9a833c/prowler/compliance/aws/cis_1.4_aws.json",
     "revision": "fe7e6675e0fbd334855b86992c062bd0fe9a833c",
