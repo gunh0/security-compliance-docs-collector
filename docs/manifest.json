@@ -137,6 +137,12 @@
     "updated": "2026-09-03",
     "collected": "2026-09-04"
   },
+  "azure/soc2.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/fe7e6675e0fbd334855b86992c062bd0fe9a833c/prowler/compliance/azure/soc2_azure.json",
+    "revision": "fe7e6675e0fbd334855b86992c062bd0fe9a833c",
+    "updated": "2026-06-26",
+    "collected": "2026-09-15"
+  },
   "gcp/cis_google_cloud_platform_foundation_benchmark_v2.0.0.json": {
     "source": "https://github.com/prowler-cloud/prowler/blob/9a50dffaa0db93d80f8a586e994dc7131d73b0ea/prowler/compliance/gcp/cis_2.0_gcp.json",
     "revision": "9a50dffaa0db93d80f8a586e994dc7131d73b0ea",
