@@ -77,6 +77,12 @@
     "updated": "2026-09-03",
     "collected": "2026-09-08"
   },
+  "aws/mitre_attack.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/f19106281be6f3834d8b9818f128892f6290b93b/prowler/compliance/aws/mitre_attack_aws.json",
+    "revision": "f19106281be6f3834d8b9818f128892f6290b93b",
+    "updated": "2026-08-03",
+    "collected": "2026-09-19"
+  },
   "aws/nist_800_53_revision_5.json": {
     "source": "https://github.com/prowler-cloud/prowler/blob/8f35fff255d189d1f4658c85b8bd0f5fefb48398/prowler/compliance/aws/nist_800_53_revision_5_aws.json",
     "revision": "8f35fff255d189d1f4658c85b8bd0f5fefb48398",
