@@ -185,6 +185,12 @@
     "updated": "2026-09-03",
     "collected": "2026-09-05"
   },
+  "gcp/mitre_attack.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/9e67f31913063b3bd7aa3b70c309eee97397206a/prowler/compliance/gcp/mitre_attack_gcp.json",
+    "revision": "9e67f31913063b3bd7aa3b70c309eee97397206a",
+    "updated": "2026-03-24",
+    "collected": "2026-09-22"
+  },
   "gcp/soc2.json": {
     "source": "https://github.com/prowler-cloud/prowler/blob/8f35fff255d189d1f4658c85b8bd0f5fefb48398/prowler/compliance/gcp/soc2_gcp.json",
     "revision": "8f35fff255d189d1f4658c85b8bd0f5fefb48398",
