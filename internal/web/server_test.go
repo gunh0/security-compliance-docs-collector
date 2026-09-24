@@ -65,7 +65,7 @@ func TestIndex(t *testing.T) {
 	if iso < 0 || iso < older {
 		t.Errorf("standards not listed after CIS benchmarks:\n%s", body)
 	}
-	for _, want := range []string{`<span class="framework">ISO/IEC 27001</span>`, `<span class="pill">2022</span>`, "<dt>Frameworks</dt><dd>2</dd>"} {
+	for _, want := range []string{`<span class="framework">ISO/IEC 27001</span>`, `<span class="pill">2022</span>`, "<dt>Frameworks</dt><dd>2</dd>", `data-framework="ISO/IEC 27001">ISO/IEC 27001</button>`, `<li data-framework="CIS">`} {
 		if !strings.Contains(body, want) {
 			t.Errorf("index does not contain %s", want)
 		}

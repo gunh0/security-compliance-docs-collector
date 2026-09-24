@@ -67,7 +67,7 @@ func frameworkLabel(f string) string {
 type indexView struct {
 	Sections     []sectionView
 	Documents    int
-	Frameworks   int
+	Frameworks   []string // display names, CIS first
 	Requirements int
 }
 
@@ -117,15 +117,16 @@ func newIndexView(tree []*catalog.Node) indexView {
 		v.addSection("other", loose)
 	}
 
-	frameworks := map[string]bool{}
+	seen := map[string]bool{}
 	for _, s := range v.Sections {
 		for _, d := range s.Docs {
-			if d.Framework != "" {
-				frameworks[d.Framework] = true
+			if d.Framework != "" && !seen[d.Framework] {
+				seen[d.Framework] = true
+				v.Frameworks = append(v.Frameworks, d.Framework)
 			}
 		}
 	}
-	v.Frameworks = len(frameworks)
+	sort.Slice(v.Frameworks, func(i, j int) bool { return frameworkLess(v.Frameworks[i], v.Frameworks[j]) })
 	return v
 }
 
@@ -155,18 +156,20 @@ func (v *indexView) addSection(name string, nodes []*catalog.Node) {
 		v.Requirements += d.Requirements
 	}
 
-	sort.SliceStable(s.Docs, func(i, j int) bool {
-		a, b := s.Docs[i].Framework, s.Docs[j].Framework
-		if (a == "CIS") != (b == "CIS") {
-			return a == "CIS"
-		}
-		return a < b
-	})
+	sort.SliceStable(s.Docs, func(i, j int) bool { return frameworkLess(s.Docs[i].Framework, s.Docs[j].Framework) })
 	for i := range s.Docs {
 		f := s.Docs[i].Framework
 		s.Docs[i].Latest = perFramework[f] > 1 && (i == 0 || s.Docs[i-1].Framework != f)
 	}
 	v.Sections = append(v.Sections, s)
+}
+
+// frameworkLess orders CIS before other frameworks, then by name.
+func frameworkLess(a, b string) bool {
+	if (a == "CIS") != (b == "CIS") {
+		return a == "CIS"
+	}
+	return a < b
 }
 
 // documents flattens the documents under nodes, keeping their order.

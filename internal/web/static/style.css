@@ -126,6 +126,36 @@ body {
   word-break: break-all;
 }
 
+/* Framework filter */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.filter {
+  padding: 5px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.filter:hover {
+  border-color: var(--muted);
+}
+
+.filter.active {
+  border-color: var(--text);
+  background: var(--text);
+  color: var(--bg);
+}
+
 /* Provider sections */
 
 .provider {
