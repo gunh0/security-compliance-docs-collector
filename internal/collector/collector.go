@@ -1,5 +1,6 @@
-// Package collector fetches CIS benchmark documents published in the
-// Prowler compliance catalog and stores them in the docs directory.
+// Package collector fetches compliance documents (CIS benchmarks and other
+// frameworks) published in the Prowler compliance catalog and stores them in
+// the docs directory.
 package collector
 
 import (
@@ -24,11 +25,14 @@ import (
 
 const maxDocumentSize = 16 << 20
 
-// Provider is a cloud or platform whose CIS benchmarks are collected.
+// ErrNotPublished is returned for documents that do not exist in the source.
+var ErrNotPublished = errors.New("document not published")
+
+// Provider is a cloud or platform whose documents are collected.
 type Provider struct {
 	Name       string // directory name, e.g. "aws"
 	Label      string // value of the document's Provider field, e.g. "AWS"
-	FilePrefix string // local file name prefix
+	FilePrefix string // local file name prefix of CIS benchmarks; empty if none are collected
 }
 
 // Providers lists the providers kept in the docs directory.
@@ -39,6 +43,27 @@ var Providers = []Provider{
 	{"kubernetes", "Kubernetes", "cis_kubernetes_benchmark"},
 	{"oraclecloud", "OracleCloud", "cis_oracle_cloud_infrastructure_foundations_benchmark"},
 	{"alibabacloud", "AlibabaCloud", "cis_alibaba_cloud_foundations_benchmark"},
+	{"nhn", "NHN", ""},
+}
+
+// Standard is a non-CIS framework published under the same file name for
+// each provider, e.g. iso27001_2022_aws.json.
+type Standard struct {
+	Name      string   // upstream file name without the provider suffix
+	Framework string   // expected Framework field
+	Providers []string // provider directory names
+}
+
+// Standards lists the non-CIS frameworks kept in the docs directory.
+var Standards = []Standard{
+	{"iso27001_2022", "ISO27001", []string{"aws", "azure", "gcp", "kubernetes", "nhn"}},
+	{"kisa_isms_p_2023_korean", "KISA-ISMS-P", []string{"aws"}},
+	{"nist_800_53_revision_5", "NIST-800-53-Revision-5", []string{"aws"}},
+	{"nist_csf_2.0", "NIST-CSF", []string{"aws"}},
+	{"aws_foundational_security_best_practices", "AWS-Foundational-Security-Best-Practices", []string{"aws"}},
+	{"aws_well_architected_framework_security_pillar", "AWS-Well-Architected-Framework-Security-Pillar", []string{"aws"}},
+	{"soc2", "SOC2", []string{"aws", "azure", "gcp"}},
+	{"mitre_attack", "MITRE-ATTACK", []string{"aws", "azure", "gcp"}},
 }
 
 // Source is a GitHub repository directory holding compliance documents,
@@ -65,21 +90,44 @@ func Prowler() *Source {
 	}
 }
 
-// Benchmark is one version of a provider's CIS benchmark in the source.
-type Benchmark struct {
-	Provider Provider
-	Version  Version
-	Path     string // path of the document in the source repository
+// Document is a provider's compliance document in the source.
+type Document struct {
+	Provider  Provider
+	Framework string  // expected Framework field, e.g. "CIS"
+	Version   Version // CIS benchmarks only
+	Name      string  // local file name without extension; empty for CIS benchmarks
+	Path      string  // path of the document in the source repository
 }
 
-// FileName is the local file name of the benchmark.
-func (b Benchmark) FileName() string {
+// FileName is the local file name of the document.
+func (b Document) FileName() string {
+	if b.Name != "" {
+		return b.Name + ".json"
+	}
 	return fmt.Sprintf("%s_v%s.json", b.Provider.FilePrefix, b.Version)
 }
 
-// LocalPath is the slash-separated path of the benchmark in the docs root.
-func (b Benchmark) LocalPath() string {
+// LocalPath is the slash-separated path of the document in the docs root.
+func (b Document) LocalPath() string {
 	return b.Provider.Name + "/" + b.FileName()
+}
+
+// Standards returns the non-CIS documents of p in the source.
+func (s *Source) Standards(p Provider) []Document {
+	var docs []Document
+	for _, st := range Standards {
+		for _, name := range st.Providers {
+			if name == p.Name {
+				docs = append(docs, Document{
+					Provider:  p,
+					Framework: st.Framework,
+					Name:      st.Name,
+					Path:      fmt.Sprintf("%s/%s/%s_%s.json", s.Dir, p.Name, st.Name, p.Name),
+				})
+			}
+		}
+	}
+	return docs
 }
 
 // Revision is the upstream commit that last changed a document.
@@ -89,7 +137,7 @@ type Revision struct {
 }
 
 // List returns the CIS benchmarks of p in the source, oldest first.
-func (s *Source) List(ctx context.Context, p Provider) ([]Benchmark, error) {
+func (s *Source) List(ctx context.Context, p Provider) ([]Document, error) {
 	dir := s.Dir + "/" + p.Name
 	u := fmt.Sprintf("%s/repos/%s/contents/%s?ref=%s", s.APIBase, s.Repo, dir, url.QueryEscape(s.Ref))
 	body, err := s.get(ctx, u, "application/vnd.github+json")
@@ -106,7 +154,7 @@ func (s *Source) List(ctx context.Context, p Provider) ([]Benchmark, error) {
 	}
 
 	pattern := regexp.MustCompile(`^cis_(\d+(?:\.\d+)*)_` + regexp.QuoteMeta(p.Name) + `\.json$`)
-	var benchmarks []Benchmark
+	var benchmarks []Document
 	for _, e := range entries {
 		m := pattern.FindStringSubmatch(e.Name)
 		if e.Type != "file" || m == nil {
@@ -116,7 +164,7 @@ func (s *Source) List(ctx context.Context, p Provider) ([]Benchmark, error) {
 		if err != nil {
 			return nil, err
 		}
-		benchmarks = append(benchmarks, Benchmark{Provider: p, Version: v, Path: dir + "/" + e.Name})
+		benchmarks = append(benchmarks, Document{Provider: p, Framework: "CIS", Version: v, Path: dir + "/" + e.Name})
 	}
 
 	sort.Slice(benchmarks, func(i, j int) bool { return benchmarks[i].Version.Less(benchmarks[j].Version) })
@@ -125,7 +173,7 @@ func (s *Source) List(ctx context.Context, p Provider) ([]Benchmark, error) {
 
 // Revision returns the latest commit, reachable from the source ref, that
 // changed b.
-func (s *Source) Revision(ctx context.Context, b Benchmark) (Revision, error) {
+func (s *Source) Revision(ctx context.Context, b Document) (Revision, error) {
 	u := fmt.Sprintf("%s/repos/%s/commits?path=%s&sha=%s&per_page=1",
 		s.APIBase, s.Repo, url.QueryEscape(b.Path), url.QueryEscape(s.Ref))
 	body, err := s.get(ctx, u, "application/vnd.github+json")
@@ -145,21 +193,21 @@ func (s *Source) Revision(ctx context.Context, b Benchmark) (Revision, error) {
 		return Revision{}, fmt.Errorf("history of %s: %w", b.Path, err)
 	}
 	if len(commits) == 0 {
-		return Revision{}, fmt.Errorf("history of %s: no commits", b.Path)
+		return Revision{}, fmt.Errorf("%s: %w", b.Path, ErrNotPublished)
 	}
 	return Revision{SHA: commits[0].SHA, Date: commits[0].Commit.Committer.Date}, nil
 }
 
 // SourceURL links to b as of rev.
-func (s *Source) SourceURL(b Benchmark, rev Revision) string {
+func (s *Source) SourceURL(b Document, rev Revision) string {
 	return fmt.Sprintf("https://github.com/%s/blob/%s/%s", s.Repo, rev.SHA, b.Path)
 }
 
-// Fetch downloads b as of rev, checks that it is the expected CIS document
-// and returns it indented with four spaces, like the rest of the docs
-// directory, together with the version stated in the document. That version
-// may be more precise than the file name, e.g. 4.0.1 in cis_4.0_aws.json.
-func (s *Source) Fetch(ctx context.Context, b Benchmark, rev Revision) ([]byte, Version, error) {
+// Fetch downloads b as of rev, checks that it is the expected document and
+// returns it indented with four spaces, like the rest of the docs directory.
+// For CIS benchmarks it also returns the version stated in the document,
+// which may be more precise than the file name, e.g. 4.0.1 in cis_4.0_aws.json.
+func (s *Source) Fetch(ctx context.Context, b Document, rev Revision) ([]byte, Version, error) {
 	body, err := s.get(ctx, fmt.Sprintf("%s/%s/%s/%s", s.RawBase, s.Repo, rev.SHA, b.Path), "")
 	if err != nil {
 		return nil, Version{}, err
@@ -174,10 +222,13 @@ func (s *Source) Fetch(ctx context.Context, b Benchmark, rev Revision) ([]byte, 
 	if err := json.Unmarshal(body, &doc); err != nil {
 		return nil, Version{}, fmt.Errorf("%s: %w", b.FileName(), err)
 	}
-	v, err := ParseVersion(doc.Version)
+	var v Version
+	if b.Framework == "CIS" {
+		v, err = ParseVersion(doc.Version)
+	}
 	switch {
-	case doc.Framework != "CIS":
-		return nil, v, fmt.Errorf("%s: framework is %q, want CIS", b.FileName(), doc.Framework)
+	case doc.Framework != b.Framework:
+		return nil, v, fmt.Errorf("%s: framework is %q, want %s", b.FileName(), doc.Framework, b.Framework)
 	case !strings.EqualFold(doc.Provider, b.Provider.Label):
 		return nil, v, fmt.Errorf("%s: provider is %q, want %s", b.FileName(), doc.Provider, b.Provider.Label)
 	case err != nil || !v.Refines(b.Version):
@@ -222,9 +273,9 @@ type Options struct {
 	Now     func() time.Time // clock for the collection date; defaults to time.Now
 }
 
-// Sync stores the benchmarks of each provider under docsDir/<provider>/ and
-// records their upstream revision in the manifest. Existing documents are
-// only replaced when opts.Refresh is set.
+// Sync stores the CIS benchmarks and standards of each provider under
+// docsDir/<provider>/ and records their upstream revision in the manifest.
+// Existing documents are only replaced when opts.Refresh is set.
 func Sync(ctx context.Context, s *Source, docsDir string, providers []Provider, opts Options) (results []Result, err error) {
 	if opts.Now == nil {
 		opts.Now = time.Now
@@ -243,18 +294,23 @@ func Sync(ctx context.Context, s *Source, docsDir string, providers []Provider, 
 	}()
 
 	for _, p := range providers {
-		benchmarks, err := s.List(ctx, p)
-		if err != nil {
-			return results, err
+		var docs []Document
+		if p.FilePrefix != "" {
+			benchmarks, err := s.List(ctx, p)
+			if err != nil {
+				return results, err
+			}
+			if len(benchmarks) == 0 {
+				return results, fmt.Errorf("no CIS benchmarks found for %s", p.Name)
+			}
+			if !opts.All {
+				benchmarks = benchmarks[len(benchmarks)-1:]
+			}
+			docs = append(docs, benchmarks...)
 		}
-		if len(benchmarks) == 0 {
-			return results, fmt.Errorf("no CIS benchmarks found for %s", p.Name)
-		}
-		if !opts.All {
-			benchmarks = benchmarks[len(benchmarks)-1:]
-		}
+		docs = append(docs, s.Standards(p)...)
 
-		for _, b := range benchmarks {
+		for _, b := range docs {
 			local, known := m.Find(b.Path)
 			if !known {
 				local = b.LocalPath()
@@ -263,6 +319,9 @@ func Sync(ctx context.Context, s *Source, docsDir string, providers []Provider, 
 				continue
 			}
 			rev, err := s.Revision(ctx, b)
+			if errors.Is(err, ErrNotPublished) && b.Framework != "CIS" {
+				continue // not published for this provider at the source ref
+			}
 			if err != nil {
 				return results, err
 			}
@@ -287,7 +346,7 @@ func Sync(ctx context.Context, s *Source, docsDir string, providers []Provider, 
 				if err != nil {
 					return results, err
 				}
-				if status == Added && !known {
+				if status == Added && !known && b.Framework == "CIS" {
 					// Name the file after the version stated in the document.
 					b.Version = v
 					local = b.LocalPath()

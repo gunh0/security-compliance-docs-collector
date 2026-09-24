@@ -12,27 +12,37 @@
             <div class="container">
                 <p class="eyebrow">Security Compliance</p>
                 <h1>Compliance Docs Collector</h1>
-                <p class="lead">CIS Benchmarks for cloud and container platforms,
-                    collected and browsable in one place.</p>
+                <p class="lead">CIS Benchmarks and compliance frameworks for cloud
+                    and container platforms, collected and browsable in one place.</p>
                 <dl class="stats">
                     <div><dt>Documents</dt><dd>{{.Documents}}</dd></div>
                     <div><dt>Providers</dt><dd>{{len .Sections}}</dd></div>
+                    <div><dt>Frameworks</dt><dd>{{len .Frameworks}}</dd></div>
                     <div><dt>Requirements</dt><dd>{{.Requirements}}</dd></div>
                 </dl>
             </div>
         </header>
 
         <main class="container">
+            {{if gt (len .Frameworks) 1}}
+            <nav class="filters" aria-label="Filter by framework">
+                <button type="button" class="filter active" data-framework="">All</button>
+                {{range .Frameworks}}<button type="button" class="filter" data-framework="{{.}}">{{.}}</button>
+                {{end}}
+            </nav>
+            {{end}}
+
             {{range .Sections}}
             <section class="provider provider-{{.Name}}">
                 <h2>{{.Label}} <span class="count">{{len .Docs}}</span></h2>
                 <ul class="doc-list">
                     {{range .Docs}}
-                    <li>
+                    <li data-framework="{{.Framework}}">
                         <a class="doc" href="/view/{{.Path}}">
+                            {{with .Framework}}<span class="framework">{{.}}</span>{{end}}
                             <span class="doc-title">{{.Title}}</span>
                             <span class="doc-meta">
-                                {{if .Version}}<span class="pill">v{{.Version}}</span>{{end}}
+                                {{with .VersionLabel}}<span class="pill">{{.}}</span>{{end}}
                                 {{if .Latest}}<span class="pill pill-latest">Latest</span>{{end}}
                                 {{if .Requirements}}<span>{{.Requirements}} requirements</span>{{end}}
                             </span>
@@ -46,5 +56,26 @@
             <p class="empty">No documents found. Run <code>make collect</code> to fetch them.</p>
             {{end}}
         </main>
+
+        <script>
+        document.querySelectorAll('.filter').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const framework = button.dataset.framework;
+                document.querySelectorAll('.filter').forEach(function(b) {
+                    b.classList.toggle('active', b === button);
+                });
+                document.querySelectorAll('.provider').forEach(function(section) {
+                    let visible = 0;
+                    section.querySelectorAll('li[data-framework]').forEach(function(item) {
+                        const show = !framework || item.dataset.framework === framework;
+                        item.hidden = !show;
+                        if (show) visible++;
+                    });
+                    section.hidden = visible === 0;
+                    section.querySelector('.count').textContent = visible;
+                });
+            });
+        });
+    </script>
     </body>
 </html>

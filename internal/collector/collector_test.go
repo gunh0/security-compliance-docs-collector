@@ -209,6 +209,34 @@ func TestSync(t *testing.T) {
 	}
 }
 
+func TestSyncStandards(t *testing.T) {
+	u := &upstream{
+		revisions: map[string]string{"cis_7.0_aws.json": "r1", "iso27001_2022_aws.json": "r1", "soc2_aws.json": "r1"},
+		docs: map[string]string{
+			"r1/cis_7.0_aws.json":       doc("AWS", "7.0"),
+			"r1/iso27001_2022_aws.json": `{"Framework":"ISO27001","Version":"2022","Provider":"AWS","Requirements":[{"Id":"A.5.1"}]}`,
+			"r1/soc2_aws.json":          `{"Framework":"ISO27001","Version":"","Provider":"AWS","Requirements":[{"Id":"cc_1_1"}]}`,
+		},
+	}
+	s := u.source(t)
+	dir := t.TempDir()
+
+	// Standards not published upstream (e.g. nist_csf_2.0_aws.json) are skipped.
+	results, err := Sync(context.Background(), s, dir, []Provider{aws}, Options{Match: "iso27001", Now: fixedClock})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(results) != 1 || results[0].Path != "aws/iso27001_2022.json" || results[0].Status != Added {
+		t.Fatalf("results = %+v", results)
+	}
+
+	// soc2_aws.json claims to be ISO27001.
+	if _, err := Sync(context.Background(), s, dir, []Provider{aws}, Options{Match: "soc2", Now: fixedClock}); err == nil ||
+		!strings.Contains(err.Error(), `framework is "ISO27001", want SOC2`) {
+		t.Errorf("err = %v, want framework mismatch", err)
+	}
+}
+
 func TestSyncPatchVersion(t *testing.T) {
 	// cis_4.0_aws.json holds version 4.0.1 of the benchmark.
 	u := &upstream{
@@ -219,7 +247,7 @@ func TestSyncPatchVersion(t *testing.T) {
 	dir := t.TempDir()
 
 	for _, want := range []Status{Added, UpToDate} {
-		results, err := Sync(context.Background(), s, dir, []Provider{aws}, Options{Now: fixedClock})
+		results, err := Sync(context.Background(), s, dir, []Provider{aws}, Options{Match: "cis_", Now: fixedClock})
 		if err != nil {
 			t.Fatal(err)
 		}

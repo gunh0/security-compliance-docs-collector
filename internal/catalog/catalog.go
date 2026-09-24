@@ -43,6 +43,18 @@ type Meta struct {
 	Source    string // upstream URL
 }
 
+// VersionLabel prefixes numeric versions with "v" ("v7.0.0") and keeps
+// others as they are ("2022").
+func (m *Meta) VersionLabel() string { return VersionLabel(m.Version) }
+
+// VersionLabel formats a document version for display.
+func VersionLabel(v string) string {
+	if strings.Contains(v, ".") {
+		return "v" + v
+	}
+	return v
+}
+
 // IsDir reports whether the node is a folder.
 func (n *Node) IsDir() bool { return n.Children != nil }
 
@@ -125,6 +137,7 @@ func (meta *Meta) addSource(e manifest.Entry) {
 func describe(name string, b []byte) (*Meta, error) {
 	var doc struct {
 		Framework    string
+		Name         string
 		Provider     string
 		Version      string
 		Description  string
@@ -145,6 +158,8 @@ func describe(name string, b []byte) (*Meta, error) {
 	if sub := fileNamePattern.FindStringSubmatch(name); sub != nil {
 		m.Title = titleFromSlug(sub[1])
 		m.Version = sub[2]
+	} else if doc.Name != "" {
+		m.Title = doc.Name
 	}
 	return m, nil
 }

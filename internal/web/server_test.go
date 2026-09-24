@@ -15,6 +15,7 @@ func newTestServer(t *testing.T) *httptest.Server {
 		"aws/cis_v3.0.0.json":         {Data: []byte(`{"Framework":"CIS","Provider":"AWS","Note":"</script><script>alert(1)</script>","Requirements":[{},{}]}`)},
 		"aws/cis_v1.4.0.json":         {Data: []byte(`{"Framework":"CIS","Provider":"AWS","Requirements":[{}]}`)},
 		"aws/notes.txt":               {Data: []byte("not a document")},
+		"aws/iso27001_2022.json":      {Data: []byte(`{"Framework":"ISO27001","Name":"ISO/IEC 27001 Information Security Management Standard 2022","Version":"2022","Provider":"AWS","Requirements":[{}]}`)},
 		"oraclecloud/cis_v3.1.0.json": {Data: []byte(`{"Framework":"CIS","Provider":"OracleCloud","Requirements":[{}]}`)},
 		"manifest.json":               {Data: []byte(`{"aws/cis_v3.0.0.json":{"source":"https://github.com/prowler-cloud/prowler/blob/abc/prowler/compliance/aws/cis_3.0_aws.json","revision":"abc","updated":"2026-07-09","collected":"2026-07-10"}}`)},
 	}
@@ -59,13 +60,23 @@ func TestIndex(t *testing.T) {
 	if latest < 0 || older < 0 || latest > older {
 		t.Errorf("versions not listed newest first:\n%s", body)
 	}
+	// CIS benchmarks come before other frameworks of the same provider.
+	iso := strings.Index(body, "ISO/IEC 27001 Information Security Management Standard 2022")
+	if iso < 0 || iso < older {
+		t.Errorf("standards not listed after CIS benchmarks:\n%s", body)
+	}
+	for _, want := range []string{`<span class="framework">ISO/IEC 27001</span>`, `<span class="pill">2022</span>`, "<dt>Frameworks</dt><dd>2</dd>", `data-framework="ISO/IEC 27001">ISO/IEC 27001</button>`, `<li data-framework="CIS">`} {
+		if !strings.Contains(body, want) {
+			t.Errorf("index does not contain %s", want)
+		}
+	}
 	if !strings.Contains(body, `Updated <time datetime="2026-07-09">`) {
 		t.Errorf("last updated date not shown:\n%s", body)
 	}
 	if strings.Contains(body, "manifest.json") {
 		t.Error("index lists the manifest")
 	}
-	if strings.Count(body, "pill-latest") != 2 || !strings.Contains(body, "<dd>4</dd>") {
+	if strings.Count(body, "pill-latest") != 1 || !strings.Contains(body, "<dd>5</dd>") {
 		t.Errorf("unexpected latest badge or requirement total:\n%s", body)
 	}
 }

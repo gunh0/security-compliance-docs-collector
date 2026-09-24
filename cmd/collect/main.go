@@ -1,4 +1,4 @@
-// Command collect downloads the latest CIS benchmark documents from the
+// Command collect downloads CIS benchmarks and other compliance documents from the
 // Prowler compliance catalog into the docs directory.
 package main
 

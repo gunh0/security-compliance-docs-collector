@@ -5,6 +5,18 @@
     "updated": "2026-06-26",
     "collected": "2026-08-31"
   },
+  "aws/aws_foundational_security_best_practices.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/465e35bf549239930447a6689397c98c825258eb/prowler/compliance/aws/aws_foundational_security_best_practices_aws.json",
+    "revision": "465e35bf549239930447a6689397c98c825258eb",
+    "updated": "2026-08-25",
+    "collected": "2026-09-11"
+  },
+  "aws/aws_well_architected_framework_security_pillar.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/8f35fff255d189d1f4658c85b8bd0f5fefb48398/prowler/compliance/aws/aws_well_architected_framework_security_pillar_aws.json",
+    "revision": "8f35fff255d189d1f4658c85b8bd0f5fefb48398",
+    "updated": "2026-09-03",
+    "collected": "2026-09-12"
+  },
   "aws/cis_amazon_web_services_foundations_benchmark_v1.4.0.json": {
     "source": "https://github.com/prowler-cloud/prowler/blob/fe7e6675e0fbd334855b86992c062bd0fe9a833c/prowler/compliance/aws/cis_1.4_aws.json",
     "revision": "fe7e6675e0fbd334855b86992c062bd0fe9a833c",
@@ -53,6 +65,42 @@
     "updated": "2026-07-09",
     "collected": "2026-08-08"
   },
+  "aws/iso27001_2022.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/f19106281be6f3834d8b9818f128892f6290b93b/prowler/compliance/aws/iso27001_2022_aws.json",
+    "revision": "f19106281be6f3834d8b9818f128892f6290b93b",
+    "updated": "2026-08-03",
+    "collected": "2026-09-03"
+  },
+  "aws/kisa_isms_p_2023_korean.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/8f35fff255d189d1f4658c85b8bd0f5fefb48398/prowler/compliance/aws/kisa_isms_p_2023_korean_aws.json",
+    "revision": "8f35fff255d189d1f4658c85b8bd0f5fefb48398",
+    "updated": "2026-09-03",
+    "collected": "2026-09-08"
+  },
+  "aws/mitre_attack.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/f19106281be6f3834d8b9818f128892f6290b93b/prowler/compliance/aws/mitre_attack_aws.json",
+    "revision": "f19106281be6f3834d8b9818f128892f6290b93b",
+    "updated": "2026-08-03",
+    "collected": "2026-09-19"
+  },
+  "aws/nist_800_53_revision_5.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/8f35fff255d189d1f4658c85b8bd0f5fefb48398/prowler/compliance/aws/nist_800_53_revision_5_aws.json",
+    "revision": "8f35fff255d189d1f4658c85b8bd0f5fefb48398",
+    "updated": "2026-09-03",
+    "collected": "2026-09-09"
+  },
+  "aws/nist_csf_2.0.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/f19106281be6f3834d8b9818f128892f6290b93b/prowler/compliance/aws/nist_csf_2.0_aws.json",
+    "revision": "f19106281be6f3834d8b9818f128892f6290b93b",
+    "updated": "2026-08-03",
+    "collected": "2026-09-10"
+  },
+  "aws/soc2.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/8f35fff255d189d1f4658c85b8bd0f5fefb48398/prowler/compliance/aws/soc2_aws.json",
+    "revision": "8f35fff255d189d1f4658c85b8bd0f5fefb48398",
+    "updated": "2026-09-03",
+    "collected": "2026-09-14"
+  },
   "azure/cis_microsoft_azure_foundations_benchmark_v2.0.0.json": {
     "source": "https://github.com/prowler-cloud/prowler/blob/b9298b4023f14cf5e119468c7e19914b5cd5a97b/prowler/compliance/azure/cis_2.0_azure.json",
     "revision": "b9298b4023f14cf5e119468c7e19914b5cd5a97b",
@@ -89,6 +137,24 @@
     "updated": "2026-06-29",
     "collected": "2026-08-08"
   },
+  "azure/iso27001_2022.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/8f35fff255d189d1f4658c85b8bd0f5fefb48398/prowler/compliance/azure/iso27001_2022_azure.json",
+    "revision": "8f35fff255d189d1f4658c85b8bd0f5fefb48398",
+    "updated": "2026-09-03",
+    "collected": "2026-09-04"
+  },
+  "azure/mitre_attack.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/8f35fff255d189d1f4658c85b8bd0f5fefb48398/prowler/compliance/azure/mitre_attack_azure.json",
+    "revision": "8f35fff255d189d1f4658c85b8bd0f5fefb48398",
+    "updated": "2026-09-03",
+    "collected": "2026-09-20"
+  },
+  "azure/soc2.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/fe7e6675e0fbd334855b86992c062bd0fe9a833c/prowler/compliance/azure/soc2_azure.json",
+    "revision": "fe7e6675e0fbd334855b86992c062bd0fe9a833c",
+    "updated": "2026-06-26",
+    "collected": "2026-09-15"
+  },
   "gcp/cis_google_cloud_platform_foundation_benchmark_v2.0.0.json": {
     "source": "https://github.com/prowler-cloud/prowler/blob/9a50dffaa0db93d80f8a586e994dc7131d73b0ea/prowler/compliance/gcp/cis_2.0_gcp.json",
     "revision": "9a50dffaa0db93d80f8a586e994dc7131d73b0ea",
@@ -112,6 +178,24 @@
     "revision": "ed04257e6c90f82d7758ee7e6779be60cb1a9219",
     "updated": "2026-06-29",
     "collected": "2026-08-08"
+  },
+  "gcp/iso27001_2022.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/8f35fff255d189d1f4658c85b8bd0f5fefb48398/prowler/compliance/gcp/iso27001_2022_gcp.json",
+    "revision": "8f35fff255d189d1f4658c85b8bd0f5fefb48398",
+    "updated": "2026-09-03",
+    "collected": "2026-09-05"
+  },
+  "gcp/mitre_attack.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/9e67f31913063b3bd7aa3b70c309eee97397206a/prowler/compliance/gcp/mitre_attack_gcp.json",
+    "revision": "9e67f31913063b3bd7aa3b70c309eee97397206a",
+    "updated": "2026-03-24",
+    "collected": "2026-09-22"
+  },
+  "gcp/soc2.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/8f35fff255d189d1f4658c85b8bd0f5fefb48398/prowler/compliance/gcp/soc2_gcp.json",
+    "revision": "8f35fff255d189d1f4658c85b8bd0f5fefb48398",
+    "updated": "2026-09-03",
+    "collected": "2026-09-16"
   },
   "kubernetes/cis_kubernetes_benchmark_v1.10.0.json": {
     "source": "https://github.com/prowler-cloud/prowler/blob/fe7e6675e0fbd334855b86992c062bd0fe9a833c/prowler/compliance/kubernetes/cis_1.10_kubernetes.json",
@@ -142,6 +226,18 @@
     "revision": "5404863a3e49c738416cda07df8689a15c818feb",
     "updated": "2026-06-29",
     "collected": "2026-08-08"
+  },
+  "kubernetes/iso27001_2022.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/8f35fff255d189d1f4658c85b8bd0f5fefb48398/prowler/compliance/kubernetes/iso27001_2022_kubernetes.json",
+    "revision": "8f35fff255d189d1f4658c85b8bd0f5fefb48398",
+    "updated": "2026-09-03",
+    "collected": "2026-09-06"
+  },
+  "nhn/iso27001_2022.json": {
+    "source": "https://github.com/prowler-cloud/prowler/blob/fbda66c6d118b5b6ca940150d61138be1de3c0c0/prowler/compliance/nhn/iso27001_2022_nhn.json",
+    "revision": "fbda66c6d118b5b6ca940150d61138be1de3c0c0",
+    "updated": "2025-09-22",
+    "collected": "2026-09-07"
   },
   "oraclecloud/cis_oracle_cloud_infrastructure_foundations_benchmark_v3.0.0.json": {
     "source": "https://github.com/prowler-cloud/prowler/blob/f16f94acf387258ab0c85b33dac08f3757073132/prowler/compliance/oraclecloud/cis_3.0_oraclecloud.json",
