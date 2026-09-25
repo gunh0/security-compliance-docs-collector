@@ -102,6 +102,20 @@ make fmt    # gofmt -w .
 - Document access is confined to the docs directory (`os.Root`), so path traversal requests are rejected
 - Single static binary with templates and assets embedded
 
+### Screenshots
+
+**Document list** — grouped by provider and framework, newest version first, with requirement counts and last updated dates
+
+![Document list](assets/screenshot.png)
+
+**Framework filter** — e.g. ISO/IEC 27001 across AWS, Azure, Google Cloud, Kubernetes and NHN Cloud
+
+![Framework filter](assets/screenshot-filter.png)
+
+**Document viewer** — metadata, upstream revision dates and pinned source link above an interactive JSON tree (KISA ISMS-P 2023, Korean)
+
+![Document viewer](assets/screenshot-viewer.png)
+
 ### Data Source
 
 The compliance documents in `docs/` are collected from the compliance catalog of [Prowler](https://github.com/prowler-cloud/prowler/tree/master/prowler/compliance) (Apache License 2.0), which maps CIS Benchmark and compliance framework requirements to automated checks. CIS Benchmarks are © Center for Internet Security, Inc.; each framework remains the property of its publisher.
