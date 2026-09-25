@@ -74,6 +74,8 @@ func TestBuildMeta(t *testing.T) {
 	fsys := fstest.MapFS{
 		"k8s/cis_kubernetes_benchmark_v1.10.0.json": {Data: []byte(`{"Framework":"CIS","Provider":"Kubernetes","Version":"1.10","Requirements":[{},{}]}`)},
 		"k8s/cis_kubernetes_benchmark_v1.8.0.json":  {Data: []byte(`{"Framework":"CIS","Provider":"Kubernetes","Version":"1.8","Requirements":[{}]}`)},
+
+		// Invalid JSON is listed without metadata.
 		"k8s/broken.json": {Data: []byte(`{`)},
 	}
 	nodes, err := Build(fsys)
